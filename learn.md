@@ -262,3 +262,54 @@ Students can now create groups, add members by email, remove members, and leave 
 
 ### 📝 Next Steps
 - Phase 3: Admin Assignments (creating assignments, targeting groups).
+
+---
+
+## 📅 Session 4 — 2026-08-24
+
+### Phase 3: Admin — Assignments
+
+**Goal:** Professors can create and manage assignments, assign to all or specific groups.
+
+---
+
+### ✅ Step 1 — Backend Assignments Controller
+Created `backend/src/controllers/assignments.js` with six handlers:
+
+| Handler | Endpoint | Purpose |
+|---|---|---|
+| `createAssignment` | `POST /assignments` | Creates assignment with title, description, due date, OneDrive link, target (all/specific). Inserts `assignment_targets` rows for specific groups. |
+| `updateAssignment` | `PUT /assignments/:id` | Updates assignment fields + re-syncs targeted groups. Only owner can edit. |
+| `getAllAssignments` | `GET /assignments` | Returns all assignments with targeted groups populated. |
+| `getAssignment` | `GET /assignments/:id` | Returns a single assignment with targeted groups. |
+| `deleteAssignment` | `DELETE /assignments/:id` | Deletes an assignment. Only owner can delete. Cascades to `assignment_targets`. |
+| `getAllGroups` | `GET /assignments/groups` | Returns all groups with member counts (for the admin targeting UI). |
+
+### ✅ Step 2 — Backend Assignments Routes
+Updated `backend/src/routes/assignments.js`:
+- All routes protected by `verifyToken` + `requireRole('admin')`.
+- `/groups` placed before `/:id` to avoid route parameter conflicts.
+
+Activated route in `backend/src/app.js`: `app.use('/assignments', require('./routes/assignments'))`.
+
+### ✅ Step 3 — Frontend API Helpers
+Created `frontend/src/api/assignments.js` with functions: `createAssignment`, `updateAssignment`, `getAllAssignments`, `getAssignment`, `deleteAssignment`, `getAllGroups`.
+
+### ✅ Step 4 — Frontend Admin Dashboard
+Created `frontend/src/pages/AdminDashboard.jsx`:
+- Matches glassmorphism design (slate-indigo gradient bg, animated blobs, blurred glass cards).
+- **Empty state**: Shows "No Assignments Yet" with create button.
+- **Create/Edit form**: Slide-in form with title, description, due date (datetime-local), OneDrive link, and target selector (All Groups / Specific Groups).
+- **Group picker**: When "Specific Groups" is selected, shows a grid of toggleable group buttons with member counts.
+- **Assignment cards**: List view with title, description, due date badge (green/red for overdue), target badge, OneDrive link, and hover-reveal edit/delete buttons.
+- **Targeted groups** shown as tag chips on specific-target assignments.
+
+Updated `frontend/src/App.jsx`: replaced inline placeholder with `<AdminDashboard />` component.
+
+---
+
+### 🎉 Phase 3 Complete!
+Admins can now create, edit, and delete assignments. They can target assignments to all groups or select specific groups from the targeting UI.
+
+### 📝 Next Steps
+- Phase 4: Student Assignment Viewing & Two-Step Submission Confirmation.

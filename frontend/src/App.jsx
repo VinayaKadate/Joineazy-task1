@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import StudentDashboard from './pages/StudentDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -17,31 +18,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* Protected Routes Placeholders (Phase 2 & 3) */}
-              <Route 
-                path="/student-dashboard" 
-                element={<StudentDashboard />} 
-              />
-              <Route 
-                path="/admin-dashboard" 
-                element={
-                  <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                    <div className="p-10 bg-white rounded-3xl shadow-xl border border-gray-200 text-center">
-                      <h2 className="text-3xl font-bold text-gray-800 mb-4">👨‍🏫 Admin Dashboard</h2>
-                      <p className="text-gray-500">Welcome Professor! Assignment features coming in Phase 3.</p>
-                      <button 
-                        onClick={() => {
-                          localStorage.clear();
-                          window.location.href = '/login';
-                        }}
-                        className="mt-6 px-6 py-2 bg-indigo-100 text-indigo-700 font-semibold rounded-xl hover:bg-indigo-200 transition-colors"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                } 
-              />
+              {/* Protected Routes */}
+              <Route path="/student-dashboard" element={<StudentDashboard />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
             </Routes>
           </main>
         </div>
