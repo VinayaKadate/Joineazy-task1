@@ -313,3 +313,53 @@ Admins can now create, edit, and delete assignments. They can target assignments
 
 ### 📝 Next Steps
 - Phase 4: Student Assignment Viewing & Two-Step Submission Confirmation.
+
+---
+
+## 📅 Session 5 — 2026-08-24
+
+### Phase 4: Student — Viewing & Submission Confirmation
+
+**Goal:** Students see assigned work and confirm submission with two-step verification.
+
+---
+
+### ✅ Step 1 — Backend Submissions Controller
+Created `backend/src/controllers/submissions.js` with three handlers:
+
+| Handler | Endpoint | Purpose |
+|---|---|---|
+| `getMyAssignments` | `GET /submissions/my-assignments` | Fetches all assignments targeted to the student's group (target='all' OR specific group match), with submission status. |
+| `confirmStep1` | `POST /submissions/:assignmentId/confirm-step1` | Upserts submission record, sets status to `step1_confirmed`. Only works if status is `pending`. |
+| `confirmFinal` | `POST /submissions/:assignmentId/confirm-final` | Updates status from `step1_confirmed` → `confirmed`, sets `confirmed_at` timestamp. |
+
+### ✅ Step 2 — Backend Submissions Routes
+Updated `backend/src/routes/submissions.js`:
+- All routes protected by `verifyToken` + `requireRole('student')`.
+- Static route `/my-assignments` placed before dynamic `/:assignmentId`.
+
+Activated route in `backend/src/app.js`: `app.use('/submissions', require('./routes/submissions'))`.
+
+### ✅ Step 3 — Frontend API Helpers
+Created `frontend/src/api/submissions.js` with functions: `getMyAssignments`, `confirmStep1`, `confirmFinal`.
+
+### ✅ Step 4 — Frontend Student Dashboard Update
+Major update to `frontend/src/pages/StudentDashboard.jsx`:
+- **Tabbed navigation**: "My Group" and "Assignments" tabs with a pill-style switcher.
+- **Group Progress bar**: Shows overall completion percentage with animated fill.
+- **Assignment cards**: Each shows title, description, due date badge (green/red for overdue), OneDrive link, creator name, and per-assignment progress bar.
+- **Two-step confirmation UI**:
+  - Pending → "Yes, I Have Submitted" button (amber gradient)
+  - Step 1 confirmed → "Confirm Final Submission" button (emerald gradient)
+  - Confirmed → Shows confirmation timestamp with checkmark
+- **Confirmation modal**: Glassmorphism modal dialog with cancel/confirm for each step.
+- **Status badges**: Color-coded (pending/step1/confirmed) on each assignment card.
+- **Badge counter** on the Assignments tab showing confirmed/total.
+
+---
+
+### 🎉 Phase 4 Complete!
+Students can now view assignments for their group, confirm submission via two-step verification, and see their group's progress reflected in progress bars and badges.
+
+### 📝 Next Steps
+- Phase 5: Admin Tracking & Analytics.

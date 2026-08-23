@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   assignment_id  INTEGER           NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
   group_id       INTEGER           NOT NULL REFERENCES groups(id)      ON DELETE CASCADE,
   status         submission_status NOT NULL DEFAULT 'pending',
+  file_path      TEXT,                       -- uploaded proof file path
   confirmed_at   TIMESTAMPTZ,
   created_at     TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
   UNIQUE (assignment_id, group_id)   -- one submission record per group per assignment

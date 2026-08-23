@@ -22,7 +22,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', require('./routes/auth'));
 app.use('/groups', require('./routes/groups'));
 app.use('/assignments', require('./routes/assignments'));
-// Phase 4: app.use('/submissions', require('./routes/submissions'));
+app.use('/submissions', require('./routes/submissions'));
 // Phase 5: app.use('/analytics', require('./routes/analytics'));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
