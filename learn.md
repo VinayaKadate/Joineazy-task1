@@ -209,3 +209,56 @@ Users can now securely register, log in, and be routed to their respective dashb
 
 ### 📝 Next Steps
 - Phase 2: Student Groups (creating groups, viewing groups, adding members).
+
+---
+
+## 📅 Session 3 — 2026-08-23
+
+### Phase 2: Student Groups
+
+**Goal:** Students can create and manage their own groups. A student can only belong to one group.
+
+---
+
+### ✅ Step 1 — Database Constraint
+Updated `group_members` table: changed `UNIQUE (group_id, user_id)` to `UNIQUE (user_id)` to enforce **one student = one group** at the database level.
+
+### ✅ Step 2 — Backend Groups Controller
+Created `backend/src/controllers/groups.js` with five handlers:
+
+| Handler | Endpoint | Purpose |
+|---|---|---|
+| `createGroup` | `POST /groups` | Creates a group, auto-adds creator as member. Checks if student is already in a group. |
+| `getMyGroup` | `GET /groups/mine` | Returns student's group + member list, or `null` if no group. |
+| `addMember` | `POST /groups/:id/members` | Adds student by email. Validates: exists, is student, not in any group, requester is creator. |
+| `removeMember` | `DELETE /groups/:id/members/:userId` | Creator can remove members. Cannot remove self (use leave). |
+| `leaveGroup` | `POST /groups/leave` | Leave group. If creator leaves, transfers ownership or deletes group. |
+
+### ✅ Step 3 — Backend Groups Routes
+Updated `backend/src/routes/groups.js`:
+- All routes protected by `verifyToken` + `requireRole('student')`.
+- `/leave` placed before `/:id` to avoid route parameter conflicts.
+
+Activated route in `backend/src/app.js`: `app.use('/groups', require('./routes/groups'))`.
+
+### ✅ Step 4 — Frontend API Helpers
+Created `frontend/src/api/groups.js` with functions: `createGroup`, `getMyGroup`, `addMember`, `removeMember`, `leaveGroup`.
+
+### ✅ Step 5 — Frontend Student Dashboard
+Created `frontend/src/pages/StudentDashboard.jsx`:
+- Matches the existing glassmorphism design (dark gradient bg, animated blobs, blurred glass cards).
+- **No group state**: Shows "Create Group" form with name input.
+- **Has group state**: Shows group info card with member list (avatars, badges for Creator/You) and "Add Member" form (email input).
+- Creator sees remove buttons (hover-reveal) on other members.
+- Leave group button with confirmation.
+- Success/error feedback banners with auto-dismiss.
+
+Updated `frontend/src/App.jsx`: replaced inline placeholder with `<StudentDashboard />` component.
+
+---
+
+### 🎉 Phase 2 Complete!
+Students can now create groups, add members by email, remove members, and leave groups. The one-student-one-group rule is enforced at both the database and application level.
+
+### 📝 Next Steps
+- Phase 3: Admin Assignments (creating assignments, targeting groups).

@@ -20,7 +20,7 @@ app.get('/health', (req, res) => {
 
 // ── API Routes (added phase by phase) ────────────────────────────────────────
 app.use('/auth', require('./routes/auth'));
-// Phase 2: app.use('/groups', require('./routes/groups'));
+app.use('/groups', require('./routes/groups'));
 // Phase 3: app.use('/assignments', require('./routes/assignments'));
 // Phase 4: app.use('/submissions', require('./routes/submissions'));
 // Phase 5: app.use('/analytics', require('./routes/analytics'));
