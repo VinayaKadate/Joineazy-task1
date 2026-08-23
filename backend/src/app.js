@@ -1,0 +1,41 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+
+const app = express();
+
+// ── Security & Parsing Middleware ─────────────────────────────────────────────
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ── Health Check ──────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// ── API Routes (added phase by phase) ────────────────────────────────────────
+// Phase 1: app.use('/auth', require('./routes/auth'));
+// Phase 2: app.use('/groups', require('./routes/groups'));
+// Phase 3: app.use('/assignments', require('./routes/assignments'));
+// Phase 4: app.use('/submissions', require('./routes/submissions'));
+// Phase 5: app.use('/analytics', require('./routes/analytics'));
+
+// ── 404 Handler ───────────────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// ── Global Error Handler ──────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+  });
+});
+
+module.exports = app;

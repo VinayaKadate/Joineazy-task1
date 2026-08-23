@@ -1,0 +1,24 @@
+{
+  "name": "joineazy-task1",
+  "version": "1.0.0",
+  "description": "**Stack:** React.js + Tailwind CSS · Node.js + Express · PostgreSQL · Docker · JWT Auth",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinayaKadate/Joineazy-task1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VinayaKadate/Joineazy-task1/issues"
+  },
+  "homepage": "https://github.com/VinayaKadate/Joineazy-task1#readme"
+}

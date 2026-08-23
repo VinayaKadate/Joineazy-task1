@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: joineazy_user
+      POSTGRES_PASSWORD: joineazy_pass
+      POSTGRES_DB: joineazy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=joineazy_user
+      - DB_PASSWORD=joineazy_pass
+      - DB_NAME=joineazy_db
+      - JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - db
+    # In development, you might want to uncomment these to auto-reload
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+
+  frontend:
+    # Basic Vite dev server container
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+
+volumes:
+  postgres_data:
