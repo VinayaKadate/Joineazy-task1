@@ -7,7 +7,7 @@ const app = express();
 // ── Security & Parsing Middleware ─────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,
 }));
 app.use(express.json());
@@ -19,7 +19,7 @@ app.get('/health', (req, res) => {
 });
 
 // ── API Routes (added phase by phase) ────────────────────────────────────────
-// Phase 1: app.use('/auth', require('./routes/auth'));
+app.use('/auth', require('./routes/auth'));
 // Phase 2: app.use('/groups', require('./routes/groups'));
 // Phase 3: app.use('/assignments', require('./routes/assignments'));
 // Phase 4: app.use('/submissions', require('./routes/submissions'));

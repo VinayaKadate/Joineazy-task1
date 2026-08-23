@@ -171,6 +171,41 @@ Created `docs/er_diagram.md` with a Mermaid `erDiagram` block showing all tables
 ### 🎉 Phase 0 Complete!
 We have successfully set up the Monorepo, Database Schema, Backend scaffolding, Frontend scaffolding with Tailwind CSS, and Docker orchestration.
 
-### 📝 Next Steps
+---
 
-- Phase 1: JWT auth endpoints (`/auth/register`, `/auth/login`) and Frontend AuthContext setup.
+## 📅 Session 2 — 2026-08-23
+
+### Phase 1: Authentication & Roles
+
+**Goal:** JWT-based auth working end-to-end for both student and admin roles.
+
+---
+
+### ✅ Step 1 — Backend Auth Controller
+Created `backend/src/controllers/auth.js`:
+- `register`: Validates input, hashes password with `bcryptjs`, assigns 'student' or 'admin' role, saves to `users` table via Postgres, and issues a JWT.
+- `login`: Verifies email/password against DB, compares hashes, and issues a JWT on success.
+
+### ✅ Step 2 — Backend Routes
+- Created `backend/src/routes/auth.js` mapping `/register` and `/login` to the controller.
+- Mounted the routes in `backend/src/app.js` under `/auth`.
+
+### ✅ Step 3 — Frontend AuthContext
+Created `frontend/src/context/AuthContext.jsx`:
+- Manages global state for `user`, `token`, and `loading`.
+- Implements `login`, `register`, and `logout` functions.
+- Automatically handles redirects based on `user.role` to `/admin-dashboard` or `/student-dashboard`.
+
+### ✅ Step 4 — Frontend UI Pages
+Created stunning, modern UI components with Tailwind CSS glassmorphism, glowing gradients, and animated blobs:
+- `frontend/src/pages/Login.jsx`
+- `frontend/src/pages/Register.jsx` (includes role selection buttons for testing)
+- Updated `frontend/src/App.jsx` to route to these pages and set up protected route placeholders for the dashboards.
+
+---
+
+### 🎉 Phase 1 Complete!
+Users can now securely register, log in, and be routed to their respective dashboards based on their role.
+
+### 📝 Next Steps
+- Phase 2: Student Groups (creating groups, viewing groups, adding members).
