@@ -17,4 +17,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ── Response interceptor: auto-logout on expired/invalid token ────────────────
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Only redirect if we actually had a token (i.e. the user was logged in)
+      const token = localStorage.getItem('token');
+      if (token) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Redirect to login — using window.location since this is outside React Router
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+

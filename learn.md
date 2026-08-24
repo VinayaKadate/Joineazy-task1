@@ -361,5 +361,113 @@ Major update to `frontend/src/pages/StudentDashboard.jsx`:
 ### 🎉 Phase 4 Complete!
 Students can now view assignments for their group, confirm submission via two-step verification, and see their group's progress reflected in progress bars and badges.
 
+---
+
+## 📅 Session 6 — 2026-08-25
+
+### Phase 5: Admin — Tracking & Analytics
+
+**Goal:** Professors can monitor submission status and group performance.
+
+---
+
+### ✅ Step 1 — Backend Analytics Controller
+Created `backend/src/controllers/analytics.js` with handlers for analytics and status tracking:
+
+| Handler | Endpoint | Purpose |
+|---|---|---|
+| `getAnalyticsSummary` | `GET /analytics/summary` | Calculates overall platform stats: total assignments, groups, students, and overall completion rate across all expected submissions. |
+| `getAssignmentStatus` | `GET /assignments/:id/status` | Fetches group-wise and student-wise breakdown of submissions for a specific assignment. |
+| `acceptSubmission` | `POST /assignments/:id/groups/:groupId/accept` | Updates a submission's status to `accepted`. |
+| `rejectSubmission` | `POST /assignments/:id/groups/:groupId/reject` | Updates a submission's status to `rejected`. |
+
+### ✅ Step 2 — Backend Analytics Routes
+Updated routing to include `/analytics` and linked it in `app.js`. Secured all routes under the `admin` role using `verifyToken` and `requireRole('admin')`.
+
+### ✅ Step 3 — Frontend API Helpers
+Created `frontend/src/api/analytics.js` with functions for `getAnalyticsSummary`, `getAssignmentStatus`, `acceptSubmission`, and `rejectSubmission`.
+
+### ✅ Step 4 — Frontend Admin Dashboard & Analytics UI
+Updated `AdminDashboard.jsx` and related components:
+- **Summary Cards**: Display total assignments, total groups, total students, and the overall completion rate.
+- **Assignment Status View**: A detailed table view for a selected assignment showing each targeted group, their members, and their current submission status (e.g., pending, confirmed).
+- **Review Actions**: Added buttons in the status table for admins to "Accept" or "Reject" a confirmed submission.
+- Maintained the overall glassmorphism design language across the new analytics widgets and tables.
+
+---
+
+### 🎉 Phase 5 Complete!
+Admins can now effectively monitor platform usage, view detailed submission statuses for specific assignments, and accept or reject submissions from groups.
+
 ### 📝 Next Steps
-- Phase 5: Admin Tracking & Analytics.
+- Phase 7: Documentation.
+
+---
+
+## 📅 Session 7 — 2026-08-25
+
+### Phase 6: Polish, Docker Integration, Responsiveness
+
+**Goal:** Everything runs together cleanly with one-command startup and looks presentable on all screen sizes.
+
+---
+
+### ✅ Step 1 — Frontend Dockerfile (Multi-Stage)
+Created `frontend/Dockerfile`:
+- **Stage 1 (Build):** `node:20-alpine` — installs deps, copies source, runs `npm run build`. Accepts `VITE_API_URL` as a build arg.
+- **Stage 2 (Serve):** `nginx:alpine` — copies the built `dist/` into nginx's html root. Serves on port 80.
+
+### ✅ Step 2 — Nginx Configuration
+Created `frontend/nginx.conf`:
+- **SPA fallback:** All routes → `index.html` (so React Router works on refresh).
+- **Gzip compression:** Enabled for text, CSS, JS, SVG, JSON.
+- **Static asset caching:** 1-year immutable cache for hashed assets.
+- **API reverse proxy:** `/api/` routes proxied to `http://backend:5000/`.
+
+### ✅ Step 3 — Backend Dockerfile Improvements
+Updated `backend/Dockerfile`:
+- Set `NODE_ENV=production`.
+- Uses `npm install --omit=dev` for smaller image (no devDependencies like nodemon).
+- Added `HEALTHCHECK` instruction using `wget --spider` against `/health`.
+- Changed `CMD` from `npm run start` to `node server.js` (avoids npm overhead).
+
+### ✅ Step 4 — Docker Compose Overhaul
+Updated `docker-compose.yml`:
+- **db:** Added `healthcheck` using `pg_isready` — backend now uses `depends_on: condition: service_healthy` so it won't crash on startup when Postgres isn't ready.
+- **backend:** Uses `restart: unless-stopped`. `FRONTEND_URL` updated to `http://localhost:3000`.
+- **frontend:** Builds from `frontend/Dockerfile` (nginx). Exposed on port `3000:80`. Depends on backend.
+- One-command startup: `docker-compose up --build` boots all three services.
+
+### ✅ Step 5 — Responsive UI Pass
+Applied mobile/tablet fixes across both dashboards:
+- **Touch-friendly buttons:** Remove/Edit/Delete buttons that were hover-only (`opacity-0 group-hover:opacity-100`) now use `opacity-100 sm:opacity-0 sm:group-hover:opacity-100` — always visible on touch devices, hover-reveal on desktop.
+- **Modal safety:** Confirmation modal in StudentDashboard now has `max-h-[90vh] overflow-y-auto` and `p-4` on the overlay to prevent content from being cut off on small screens.
+- Login and Register pages were already responsive — no changes needed.
+
+### ✅ Step 6 — Global Error Handling (401 Interceptor)
+Updated `frontend/src/api/axios.js`:
+- Added an Axios **response interceptor** that catches 401/403 errors.
+- If the user had a token (was logged in), it auto-clears `localStorage` and redirects to `/login`.
+- Prevents cryptic error messages when the JWT expires mid-session.
+
+### ✅ Step 7 — Seed Script
+Created `backend/seed.js`:
+- Truncates all tables, then inserts demo data in a single transaction.
+- **2 admins:** `prof.smith@university.edu`, `prof.jones@university.edu`
+- **6 students:** `alice@`, `bob@`, `charlie@`, `diana@`, `eve@`, `frank@`
+- **3 groups:** Alpha Squad (Alice, Bob), Beta Team (Charlie, Diana), Gamma Force (Eve, Frank)
+- **3 assignments:** 1 all-groups, 1 specific (Alpha+Beta), 1 specific (Gamma, overdue)
+- **4 submissions:** Mix of confirmed, step1_confirmed, accepted, rejected states.
+- All passwords: `password123`
+- Added `"seed": "node seed.js"` to `backend/package.json`.
+
+**Verified:** Seed script runs successfully, frontend builds cleanly (337KB gzip: 102KB).
+
+---
+
+### 🎉 Phase 6 Complete!
+The app now has production-ready Docker orchestration (one-command startup), responsive UI across all screen sizes, global auth error handling, and a comprehensive seed script for demos.
+
+### 📝 Next Steps
+- Phase 7: Documentation (README, API reference, ER diagram, architecture).
+

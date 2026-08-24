@@ -12,6 +12,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U joineazy_user -d joineazy_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   backend:
     build: ./backend
@@ -19,32 +25,29 @@ services:
       - "5000:5000"
     environment:
       - PORT=5000
-      - NODE_ENV=development
+      - NODE_ENV=production
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=joineazy_user
       - DB_PASSWORD=joineazy_pass
       - DB_NAME=joineazy_db
       - JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
-      - FRONTEND_URL=http://localhost:5173
+      - FRONTEND_URL=http://localhost:3000
     depends_on:
-      - db
-    # In development, you might want to uncomment these to auto-reload
-    # volumes:
-    #   - ./backend:/app
-    #   - /app/node_modules
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   frontend:
-    # Basic Vite dev server container
-    image: node:20-alpine
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5000
     ports:
-      - "5173:5173"
-    command: sh -c "npm install && npm run dev -- --host"
-    environment:
-      - VITE_API_URL=http://localhost:5000
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:

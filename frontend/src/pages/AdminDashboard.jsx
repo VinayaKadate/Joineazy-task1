@@ -484,7 +484,7 @@ const AdminDashboard = () => {
                           <p className="text-ink-muted text-sm line-clamp-2">{assignment.description}</p>
                         )}
                       </div>
-                      <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="flex gap-2 ml-4 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={() => openEditForm(assignment)}
                           className="px-3 py-1.5 border border-rule text-ink-muted text-xs font-semibold rounded hover:border-ink-muted hover:text-ink dark:hover:text-ink-dark transition-all"

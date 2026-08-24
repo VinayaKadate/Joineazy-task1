@@ -239,8 +239,8 @@ const StudentDashboard = () => {
 
       {/* ── Confirmation Modal ─────────────────────────────────────────────── */}
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 dark:bg-black/50">
-          <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-8 max-w-md mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 dark:bg-black/50 p-4">
+          <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-6">
               <h3 className="text-xl font-serif text-ink dark:text-ink-dark mb-2">
                 {confirmModal.step === 'step1' ? 'Step 1: Initial Confirmation' : 'Final Confirmation'}
@@ -473,7 +473,7 @@ const StudentDashboard = () => {
                       {group.is_creator && member.id !== user?.id && (
                         <button
                           onClick={() => handleRemoveMember(member.id, member.name)}
-                          className="opacity-0 group-hover:opacity-100 px-3 py-1 border border-accent-warn/30 text-accent-warn text-xs font-semibold rounded hover:bg-accent-warn/5 transition-all duration-200"
+                          className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 px-3 py-1 border border-accent-warn/30 text-accent-warn text-xs font-semibold rounded hover:bg-accent-warn/5 transition-all duration-200"
                         >
                           Remove
                         </button>
