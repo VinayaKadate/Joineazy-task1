@@ -497,5 +497,38 @@ Completely rewrote `README.md` to include:
 The project is fully documented and ready for submission.
 
 ### 📝 Next Steps
-- Phase 8: Deployment (Optional, time-permitting)
+- Phase 8: Deployment Configuration
+
+---
+
+## 📅 Session 8 — 2026-08-25
+
+### Phase 8: Deployment (Infrastructure as Code)
+
+**Goal:** Configure the project so it can be deployed to Vercel and Render with zero manual setup.
+
+---
+
+### ✅ Step 1 — Vercel Configuration (Frontend)
+Created `frontend/vercel.json`:
+- Configured a rewrite rule (`/(.*)` -> `/index.html`) to ensure React Router handles client-side routing properly when the SPA is deployed.
+
+### ✅ Step 2 — Render Blueprint (Backend + DB)
+Created `render.yaml` at the project root:
+- Defined a `joineazy-db` PostgreSQL database on the free tier.
+- Defined a `joineazy-backend` Node.js web service pointing to the `backend/` directory.
+- Mapped the database's `connectionString` to the `DATABASE_URL` environment variable automatically.
+- Defined deployment commands (`npm install` and `npm start`).
+
+### ✅ Step 3 — Database Connection Support
+Updated `backend/src/models/db.js`:
+- Made the `Pool` initialization accept `process.env.DATABASE_URL` if it exists (which Render uses).
+- Added `ssl: { rejectUnauthorized: false }` for external database connections, ensuring Render can connect securely.
+
+---
+
+### 🎉 Phase 8 Complete!
+The project now includes Infrastructure as Code (IaC) files. Simply connecting this repository to Vercel and Render will automatically provision the infrastructure and deploy the application.
+
+### 📝 Next Steps
 - Phase 9: Demo Video & Submission

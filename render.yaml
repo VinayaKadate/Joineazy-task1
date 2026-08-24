@@ -1,0 +1,27 @@
+databases:
+  - name: joineazy-db
+    databaseName: joineazy_db
+    user: joineazy_user
+    plan: free
+
+services:
+  - type: web
+    name: joineazy-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: joineazy-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-vercel-frontend.vercel.app # Replace this after frontend deployment
