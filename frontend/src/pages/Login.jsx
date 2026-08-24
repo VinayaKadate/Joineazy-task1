@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -9,7 +10,7 @@ const Login = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useContext(AuthContext);
+  const { login, loginWithGoogle } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +22,16 @@ const Login = () => {
       setError(result.error);
     }
     
+    setIsLoading(false);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError(null);
+    setIsLoading(true);
+    const result = await loginWithGoogle(credentialResponse.credential);
+    if (!result.success) {
+      setError(result.error);
+    }
     setIsLoading(false);
   };
 
@@ -43,6 +54,25 @@ const Login = () => {
             <p>{error}</p>
           </div>
         )}
+
+        {/* Google Sign-In Button */}
+        <div className="flex justify-center mb-6">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google sign-in was unsuccessful. Please try again.')}
+            theme="outline"
+            size="large"
+            width="350"
+            text="signin_with"
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-rule dark:bg-rule-strong"></div>
+          <span className="text-xs text-ink-muted uppercase tracking-wider">or continue with email</span>
+          <div className="flex-1 h-px bg-rule dark:bg-rule-strong"></div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1">
@@ -97,3 +127,4 @@ const Login = () => {
 };
 
 export default Login;
+

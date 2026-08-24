@@ -5,7 +5,9 @@ const helmet = require('helmet');
 const app = express();
 
 // ── Security & Parsing Middleware ─────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true,

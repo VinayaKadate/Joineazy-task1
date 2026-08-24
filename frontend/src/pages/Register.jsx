@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -11,7 +12,7 @@ const Register = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register } = useContext(AuthContext);
+  const { register, loginWithGoogle } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +24,17 @@ const Register = () => {
       setError(result.error);
     }
     
+    setIsLoading(false);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError(null);
+    setIsLoading(true);
+    // Pass the currently selected role so new Google users get the correct role
+    const result = await loginWithGoogle(credentialResponse.credential, role);
+    if (!result.success) {
+      setError(result.error);
+    }
     setIsLoading(false);
   };
 
@@ -45,6 +57,54 @@ const Register = () => {
             <p>{error}</p>
           </div>
         )}
+
+        {/* Role selection — shown before Google sign-up so the role applies */}
+        <div className="space-y-2 mb-6">
+          <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">I am a…</label>
+          <div className="grid grid-cols-2 gap-3 mt-1">
+            <button
+              type="button"
+              onClick={() => setRole('student')}
+              className={`py-3 rounded font-semibold text-sm transition-all duration-200 border ${
+                role === 'student' 
+                  ? 'bg-accent text-paper border-accent' 
+                  : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
+              }`}
+            >
+              Student
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('admin')}
+              className={`py-3 rounded font-semibold text-sm transition-all duration-200 border ${
+                role === 'admin' 
+                  ? 'bg-accent text-paper border-accent' 
+                  : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
+              }`}
+            >
+              Professor (Admin)
+            </button>
+          </div>
+        </div>
+
+        {/* Google Sign-Up Button */}
+        <div className="flex justify-center mb-6">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google sign-up was unsuccessful. Please try again.')}
+            theme="outline"
+            size="large"
+            width="350"
+            text="signup_with"
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-rule dark:bg-rule-strong"></div>
+          <span className="text-xs text-ink-muted uppercase tracking-wider">or sign up with email</span>
+          <div className="flex-1 h-px bg-rule dark:bg-rule-strong"></div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1">
@@ -84,34 +144,6 @@ const Register = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">I am a…</label>
-            <div className="grid grid-cols-2 gap-3 mt-1">
-              <button
-                type="button"
-                onClick={() => setRole('student')}
-                className={`py-3 rounded font-semibold text-sm transition-all duration-200 border ${
-                  role === 'student' 
-                    ? 'bg-accent text-paper border-accent' 
-                    : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
-                }`}
-              >
-                Student
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('admin')}
-                className={`py-3 rounded font-semibold text-sm transition-all duration-200 border ${
-                  role === 'admin' 
-                    ? 'bg-accent text-paper border-accent' 
-                    : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
-                }`}
-              >
-                Professor (Admin)
-              </button>
-            </div>
-          </div>
-
           <button 
             type="submit" 
             disabled={isLoading}
@@ -140,3 +172,4 @@ const Register = () => {
 };
 
 export default Register;
+
