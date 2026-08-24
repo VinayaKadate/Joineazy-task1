@@ -13,10 +13,8 @@
     font-weight: 700;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      background-color: #1A1A1A;
-      color: #F8FAFC;
-    }
+  .dark body {
+    background-color: #1A1A1A;
+    color: #F8FAFC;
   }
 }

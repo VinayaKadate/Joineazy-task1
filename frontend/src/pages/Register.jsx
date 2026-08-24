@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -26,7 +27,10 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper dark:bg-paper-dark px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-paper dark:bg-paper-dark px-4 py-12 relative">
+      <div className="absolute top-4 right-4 md:top-8 md:right-8">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md px-8 py-10 bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif text-ink dark:text-ink-dark tracking-tight mb-1">Join Joineazy</h1>

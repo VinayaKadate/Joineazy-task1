@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getAllAssignments, createAssignment, updateAssignment, deleteAssignment, getAllGroups } from '../api/assignments';
 import { getAnalyticsSummary, getAssignmentStatus, acceptSubmission, rejectSubmission } from '../api/analytics';
+import ThemeToggle from '../components/ThemeToggle';
 
 const AdminDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -227,6 +228,7 @@ const AdminDashboard = () => {
           <span className="font-serif text-xl text-ink dark:text-ink-dark tracking-tight">Joineazy</span>
         </div>
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <span className="text-ink-muted text-sm hidden sm:block">
             Prof. {user?.name || 'Admin'}
           </span>
