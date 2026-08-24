@@ -206,40 +206,33 @@ const AdminDashboard = () => {
   // ── Loading ───────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-paper dark:bg-paper-dark">
         <div className="flex flex-col items-center gap-4">
-          <svg className="animate-spin h-10 w-10 text-indigo-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-8 w-8 text-ink-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-indigo-200 font-medium">Loading dashboard…</p>
+          <p className="text-ink-muted text-sm">Loading dashboard…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-30 animate-blob"></div>
-      <div className="absolute bottom-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-[50%] right-[30%] w-[400px] h-[400px] bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-paper dark:bg-paper-dark">
 
       {/* ─── Header ─────────────────────────────────────────────────────────── */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5">
+      <header className="bg-paper-raised dark:bg-paper-dark-raised border-b border-rule dark:border-rule-strong px-6 md:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">J</span>
-          </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Joineazy</h1>
+          <span className="font-serif text-xl text-ink dark:text-ink-dark tracking-tight">Joineazy</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-indigo-200 text-sm font-medium hidden sm:block">
-            👨‍🏫 Prof. {user?.name || 'Admin'}
+          <span className="text-ink-muted text-sm hidden sm:block">
+            Prof. {user?.name || 'Admin'}
           </span>
           <button
             onClick={logout}
-            className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold rounded-xl hover:bg-white/20 transition-all duration-300"
+            className="px-4 py-2 border border-rule text-ink dark:text-ink-dark text-sm font-semibold rounded hover:bg-paper dark:hover:bg-paper-dark transition-all duration-200"
           >
             Sign Out
           </button>
@@ -247,52 +240,52 @@ const AdminDashboard = () => {
       </header>
 
       {/* ─── Main Content ───────────────────────────────────────────────────── */}
-      <main className="relative z-10 max-w-4xl mx-auto px-4 md:px-6 pb-12">
+      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8">
         {/* Page Title & Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-1">
-              👨‍🏫 Admin Dashboard
+            <h2 className="text-2xl md:text-3xl font-serif text-ink dark:text-ink-dark tracking-tight mb-1">
+              Admin Dashboard
             </h2>
-            <p className="text-indigo-200 font-medium">
+            <p className="text-ink-muted text-sm">
               Manage assignments and track student progress
             </p>
           </div>
-          <div className="flex bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-white/20 w-fit">
+          <div className="flex border-b border-rule dark:border-rule-strong">
             <button
               onClick={() => setActiveTab('assignments')}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                activeTab === 'assignments' ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-lg' : 'text-indigo-200 hover:text-white'
+              className={`py-2 px-5 text-sm font-semibold transition-all duration-200 border-b-2 -mb-px ${
+                activeTab === 'assignments' ? 'border-accent text-ink dark:text-ink-dark' : 'border-transparent text-ink-muted hover:text-ink dark:hover:text-ink-dark'
               }`}
             >
-              📝 Assignments
+              Assignments
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                activeTab === 'analytics' ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg' : 'text-indigo-200 hover:text-white'
+              className={`py-2 px-5 text-sm font-semibold transition-all duration-200 border-b-2 -mb-px ${
+                activeTab === 'analytics' ? 'border-accent text-ink dark:text-ink-dark' : 'border-transparent text-ink-muted hover:text-ink dark:hover:text-ink-dark'
               }`}
             >
-              📊 Analytics
+              Analytics
             </button>
           </div>
         </div>
 
         {/* ── Feedback Banners ──────────────────────────────────────────────── */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl flex items-center gap-3 text-red-200 animate-fade-in">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mb-6 p-3 border border-accent-warn/40 bg-accent-warn/5 rounded-lg flex items-center gap-3 text-accent-warn text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm font-medium">{error}</p>
+            <p>{error}</p>
           </div>
         )}
         {success && (
-          <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/50 rounded-xl flex items-center gap-3 text-emerald-200 animate-fade-in">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mb-6 p-3 border border-accent/30 bg-accent/5 rounded-lg flex items-center gap-3 text-accent dark:text-ink-dark text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm font-medium">{success}</p>
+            <p>{success}</p>
           </div>
         )}
 
@@ -305,9 +298,9 @@ const AdminDashboard = () => {
                {!showForm && (
                   <button
                     onClick={openCreateForm}
-                    className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-indigo-500/30 flex items-center gap-2"
+                    className="px-5 py-2.5 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90 flex items-center gap-2"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                     New Assignment
@@ -317,14 +310,14 @@ const AdminDashboard = () => {
 
             {/* ── Assignment Form (Create / Edit) ──────────────────────────────── */}
             {showForm && (
-              <div className="mb-8 bg-white/10 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 p-8 transition-all duration-500">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-white">
-                    {editingId ? '✏️ Edit Assignment' : '📝 New Assignment'}
+              <div className="mb-8 bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xl font-serif text-ink dark:text-ink-dark">
+                    {editingId ? 'Edit Assignment' : 'New Assignment'}
                   </h3>
                   <button
                     onClick={resetForm}
-                    className="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-all text-white/70 hover:text-white"
+                    className="p-2 text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-all"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -334,26 +327,26 @@ const AdminDashboard = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Title */}
-                  <div className="space-y-1 group">
-                    <label className="text-sm font-semibold text-indigo-100 ml-1 group-focus-within:text-white transition-colors">Title *</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Title *</label>
                     <input
                       type="text"
                       required
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-indigo-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all duration-300"
+                      className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark placeholder-ink-faint focus:outline-none focus:border-accent transition-colors"
                       placeholder="Assignment title"
                       maxLength={200}
                     />
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-1 group">
-                    <label className="text-sm font-semibold text-indigo-100 ml-1 group-focus-within:text-white transition-colors">Description</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Description</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-indigo-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all duration-300 resize-none"
+                      className="w-full px-4 py-3 bg-transparent border border-rule dark:border-rule-strong rounded-lg text-ink dark:text-ink-dark placeholder-ink-faint focus:outline-none focus:border-accent transition-colors resize-none"
                       placeholder="Describe the assignment…"
                       rows={3}
                     />
@@ -361,23 +354,23 @@ const AdminDashboard = () => {
 
                   {/* Due Date + OneDrive Link row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1 group">
-                      <label className="text-sm font-semibold text-indigo-100 ml-1 group-focus-within:text-white transition-colors">Due Date *</label>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Due Date *</label>
                       <input
                         type="datetime-local"
                         required
                         value={formData.due_date}
                         onChange={(e) => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
-                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all duration-300 [color-scheme:dark]"
+                        className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark focus:outline-none focus:border-accent transition-colors [color-scheme:dark]"
                       />
                     </div>
-                    <div className="space-y-1 group">
-                      <label className="text-sm font-semibold text-indigo-100 ml-1 group-focus-within:text-white transition-colors">OneDrive Link</label>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">OneDrive Link</label>
                       <input
                         type="url"
                         value={formData.onedrive_link}
                         onChange={(e) => setFormData(prev => ({ ...prev, onedrive_link: e.target.value }))}
-                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-indigo-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all duration-300"
+                        className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark placeholder-ink-faint focus:outline-none focus:border-accent transition-colors"
                         placeholder="https://onedrive.live.com/..."
                       />
                     </div>
@@ -385,29 +378,29 @@ const AdminDashboard = () => {
 
                   {/* Target Selection */}
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-indigo-100 ml-1">Assign To</label>
+                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Assign To</label>
                     <div className="flex gap-3">
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, target: 'all', group_ids: [] }))}
-                        className={`flex-1 py-3 px-4 rounded-2xl font-semibold text-sm transition-all duration-300 border ${
+                        className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
                           formData.target === 'all'
-                            ? 'bg-indigo-500/30 border-indigo-400/50 text-white shadow-lg shadow-indigo-500/20'
-                            : 'bg-white/5 border-white/10 text-indigo-200 hover:bg-white/10'
+                            ? 'bg-accent text-paper border-accent'
+                            : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
                         }`}
                       >
-                        🌐 All Groups
+                        All Groups
                       </button>
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, target: 'specific' }))}
-                        className={`flex-1 py-3 px-4 rounded-2xl font-semibold text-sm transition-all duration-300 border ${
+                        className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
                           formData.target === 'specific'
-                            ? 'bg-purple-500/30 border-purple-400/50 text-white shadow-lg shadow-purple-500/20'
-                            : 'bg-white/5 border-white/10 text-indigo-200 hover:bg-white/10'
+                            ? 'bg-accent text-paper border-accent'
+                            : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
                         }`}
                       >
-                        🎯 Specific Groups
+                        Specific Groups
                       </button>
                     </div>
                   </div>
@@ -415,11 +408,11 @@ const AdminDashboard = () => {
                   {/* Group Picker (when target is specific) */}
                   {formData.target === 'specific' && (
                     <div className="space-y-3">
-                      <label className="text-sm font-semibold text-indigo-100 ml-1">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">
                         Select Groups ({formData.group_ids.length} selected)
                       </label>
                       {groups.length === 0 ? (
-                        <p className="text-indigo-300/70 text-sm p-4 bg-white/5 rounded-2xl border border-white/10 text-center">
+                        <p className="text-ink-faint text-sm p-4 border border-rule dark:border-rule-strong rounded-lg text-center">
                           No groups have been created yet.
                         </p>
                       ) : (
@@ -429,14 +422,14 @@ const AdminDashboard = () => {
                               key={group.id}
                               type="button"
                               onClick={() => toggleGroupId(group.id)}
-                              className={`flex items-center justify-between p-3 rounded-xl text-sm font-medium transition-all duration-300 border ${
+                              className={`flex items-center justify-between p-3 rounded text-sm font-medium transition-all duration-200 border ${
                                 formData.group_ids.includes(group.id)
-                                  ? 'bg-purple-500/25 border-purple-400/50 text-white'
-                                  : 'bg-white/5 border-white/10 text-indigo-200 hover:bg-white/10'
+                                  ? 'bg-accent text-paper border-accent'
+                                  : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
                               }`}
                             >
                               <span>{group.name}</span>
-                              <span className="text-xs text-indigo-300/70">{group.member_count} members</span>
+                              <span className="text-xs opacity-70 font-mono">{group.member_count} members</span>
                             </button>
                           ))}
                         </div>
@@ -448,10 +441,10 @@ const AdminDashboard = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full py-4 px-6 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2"
+                    className="w-full py-3 px-6 bg-accent text-paper font-semibold rounded transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                   >
                     {submitting ? (
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -463,97 +456,82 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* ── Assignments List ─────────────────────────────────────────────── */}
+            {/* ── Assignments List — ledger style ─────────────────────────────── */}
             {assignments.length === 0 && !showForm ? (
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 p-12 text-center transition-all duration-500 hover:shadow-2xl">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">No Assignments Yet</h3>
-                <p className="text-indigo-200 text-sm mb-6">Create your first assignment to get started</p>
+              <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-12 text-center">
+                <h3 className="text-lg font-serif text-ink dark:text-ink-dark mb-1">No Assignments Yet</h3>
+                <p className="text-ink-muted text-sm mb-6">Create your first assignment to get started</p>
                 <button
                   onClick={openCreateForm}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-indigo-500/30"
+                  className="px-6 py-2.5 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90"
                 >
                   Create Assignment
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {assignments.map((assignment) => (
+              <div className="flex flex-col gap-6">
+                {assignments.map((assignment, idx) => (
                   <div
                     key={assignment.id}
-                    className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 p-6 transition-all duration-500 hover:shadow-2xl hover:bg-white/[0.12] group"
+                    className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6 shadow-sm group"
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-grow">
-                        <h3 className="text-lg font-bold text-white mb-1">{assignment.title}</h3>
+                        <h3 className="text-lg font-serif text-ink dark:text-ink-dark mb-1">{assignment.title}</h3>
                         {assignment.description && (
-                          <p className="text-indigo-200/80 text-sm line-clamp-2">{assignment.description}</p>
+                          <p className="text-ink-muted text-sm line-clamp-2">{assignment.description}</p>
                         )}
                       </div>
-                      <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                           onClick={() => openEditForm(assignment)}
-                          className="p-2 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-lg hover:bg-indigo-500/30 transition-all"
+                          className="px-3 py-1.5 border border-rule text-ink-muted text-xs font-semibold rounded hover:border-ink-muted hover:text-ink dark:hover:text-ink-dark transition-all"
                           title="Edit"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDelete(assignment.id, assignment.title)}
-                          className="p-2 bg-red-500/20 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/30 transition-all"
+                          className="px-3 py-1.5 border border-accent-warn/30 text-accent-warn text-xs font-semibold rounded hover:bg-accent-warn/5 transition-all"
                           title="Delete"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          Delete
                         </button>
                       </div>
                     </div>
 
                     {/* Meta info row */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs">
-                      {/* Due date badge */}
-                      <span className={`px-3 py-1.5 rounded-full font-semibold border ${
-                        isOverdue(assignment.due_date)
-                          ? 'bg-red-500/20 border-red-500/40 text-red-300'
-                          : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                      }`}>
-                        📅 {formatDate(assignment.due_date)}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-ink-muted">
+                      {/* Due date */}
+                      <span className={`flex items-center ${isOverdue(assignment.due_date) ? 'text-accent-warn font-semibold' : ''}`}>
+                        Due {formatDate(assignment.due_date)}
                       </span>
 
-                      {/* Target badge */}
-                      <span className={`px-3 py-1.5 rounded-full font-semibold border ${
-                        assignment.target === 'all'
-                          ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
-                          : 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-                      }`}>
-                        {assignment.target === 'all' ? '🌐 All Groups' : `🎯 ${assignment.targeted_groups?.length || 0} Group${(assignment.targeted_groups?.length || 0) !== 1 ? 's' : ''}`}
+                      {/* Target */}
+                      <span>
+                        {assignment.target === 'all' ? 'All Groups' : `${assignment.targeted_groups?.length || 0} Group${(assignment.targeted_groups?.length || 0) !== 1 ? 's' : ''}`}
                       </span>
 
                       {/* OneDrive link */}
                       {assignment.onedrive_link && (
-                        <a
-                          href={assignment.onedrive_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-full font-semibold border bg-sky-500/20 border-sky-500/40 text-sky-300 hover:bg-sky-500/30 transition-all"
-                        >
-                          🔗 OneDrive
-                        </a>
+                        <div className="flex gap-2">
+                          <a
+                            href={assignment.onedrive_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition-colors font-medium flex items-center gap-1"
+                          >
+                            OneDrive
+                          </a>
+                        </div>
                       )}
                     </div>
 
                     {/* Targeted groups list */}
                     {assignment.target === 'specific' && assignment.targeted_groups?.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-2 flex flex-wrap gap-2">
                         {assignment.targeted_groups.map((g) => (
-                          <span key={g.id} className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-indigo-200 text-xs">
+                          <span key={g.id} className="text-ink-faint text-xs font-mono">
                             {g.name}
                           </span>
                         ))}
@@ -571,35 +549,35 @@ const AdminDashboard = () => {
         {/* ==================================================================================================== */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
+            {/* Summary Cards — ledger grid */}
             {analyticsSummary && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-5 shadow-lg">
-                  <div className="text-indigo-300 text-sm font-semibold mb-1">Total Groups</div>
-                  <div className="text-3xl font-extrabold text-white">{analyticsSummary.totalGroups}</div>
+                <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-5">
+                  <div className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Total Groups</div>
+                  <div className="text-2xl font-mono font-bold text-ink dark:text-ink-dark">{analyticsSummary.totalGroups}</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-5 shadow-lg">
-                  <div className="text-pink-300 text-sm font-semibold mb-1">Total Students</div>
-                  <div className="text-3xl font-extrabold text-white">{analyticsSummary.totalStudents}</div>
+                <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-5">
+                  <div className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Total Students</div>
+                  <div className="text-2xl font-mono font-bold text-ink dark:text-ink-dark">{analyticsSummary.totalStudents}</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-5 shadow-lg">
-                  <div className="text-blue-300 text-sm font-semibold mb-1">Assignments</div>
-                  <div className="text-3xl font-extrabold text-white">{analyticsSummary.totalAssignments}</div>
+                <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-5">
+                  <div className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Assignments</div>
+                  <div className="text-2xl font-mono font-bold text-ink dark:text-ink-dark">{analyticsSummary.totalAssignments}</div>
                 </div>
-                <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 backdrop-blur-md rounded-2xl border border-indigo-400/30 p-5 shadow-lg">
-                  <div className="text-indigo-200 text-sm font-semibold mb-1">Overall Completion</div>
-                  <div className="text-3xl font-extrabold text-white">{analyticsSummary.overallCompletionRate}%</div>
+                <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-5">
+                  <div className="text-ink-muted text-xs font-semibold uppercase tracking-wider mb-1">Completion</div>
+                  <div className="text-2xl font-mono font-bold text-ink dark:text-ink-dark">{analyticsSummary.overallCompletionRate}%</div>
                 </div>
               </div>
             )}
 
             {/* Assignment Selector */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 p-6">
-              <label className="block text-sm font-semibold text-indigo-100 mb-2">Select Assignment to Track</label>
+            <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-5">
+              <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">Select Assignment to Track</label>
               <select
                 value={selectedAssignmentId}
                 onChange={(e) => setSelectedAssignmentId(e.target.value)}
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all duration-300 [&>option]:text-slate-900"
+                className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark focus:outline-none focus:border-accent transition-colors [&>option]:text-ink"
               >
                 <option value="">-- Choose an assignment --</option>
                 {assignments.map(a => (
@@ -608,75 +586,69 @@ const AdminDashboard = () => {
               </select>
             </div>
 
-            {/* Status Breakdown Table */}
+            {/* Status Breakdown — ledger table */}
             {selectedAssignmentId && (
-              <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 overflow-hidden">
-                <div className="p-6 border-b border-white/10">
-                  <h3 className="text-xl font-bold text-white">Group Submission Status</h3>
+              <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl overflow-hidden">
+                <div className="p-5 border-b border-rule dark:border-rule-strong">
+                  <h3 className="text-lg font-serif text-ink dark:text-ink-dark">Group Submission Status</h3>
                 </div>
                 
                 {loadingAnalytics ? (
-                   <div className="p-12 text-center text-indigo-200">
-                     <svg className="animate-spin h-8 w-8 text-indigo-400 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                   <div className="p-12 text-center text-ink-muted">
+                     <svg className="animate-spin h-8 w-8 text-ink-muted mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Loading statuses...
                    </div>
                 ) : assignmentStatuses.length === 0 ? (
-                  <div className="p-12 text-center text-indigo-200">
+                  <div className="p-12 text-center text-ink-muted text-sm">
                     No groups assigned to this task yet.
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-indigo-100">
-                      <thead className="bg-white/5 text-xs uppercase font-bold text-indigo-200">
-                        <tr>
-                          <th className="px-6 py-4">Group Name</th>
-                          <th className="px-6 py-4">Members</th>
-                          <th className="px-6 py-4">Status & Link</th>
-                          <th className="px-6 py-4">Confirmed At</th>
-                          <th className="px-6 py-4">Actions</th>
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b border-rule dark:border-rule-strong">
+                          <th className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider">Group</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider">Members</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider">Status</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider">Confirmed At</th>
+                          <th className="px-5 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5">
+                      <tbody>
                         {assignmentStatuses.map((group) => {
-                          const statusColors = {
-                            pending: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-                            step1_confirmed: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-                            confirmed: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-                            accepted: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-                            rejected: 'bg-red-500/20 text-red-300 border-red-500/30'
-                          };
                           const statusLabels = {
-                            pending: '⏳ Pending',
-                            step1_confirmed: '⚠️ Partial (Step 1)',
-                            confirmed: '📝 Confirmed (Review needed)',
-                            accepted: '✅ Accepted',
-                            rejected: '❌ Rejected'
+                            pending: 'Pending',
+                            step1_confirmed: 'Partial (Step 1)',
+                            confirmed: 'Needs Review',
+                            accepted: 'Accepted',
+                            rejected: 'Rejected'
+                          };
+                          const statusColors = {
+                            pending: 'text-ink-faint bg-ink-faint/10',
+                            step1_confirmed: 'text-ink-muted bg-ink-muted/10',
+                            confirmed: 'text-accent bg-accent/10',
+                            accepted: 'text-accent bg-accent/10',
+                            rejected: 'text-accent-warn bg-accent-warn/10'
                           };
                           
                           return (
-                            <tr key={group.id} className="hover:bg-white/5 transition-colors">
-                              <td className="px-6 py-4 font-semibold text-white whitespace-nowrap">
+                            <tr key={group.id} className="border-b border-rule dark:border-rule-strong last:border-b-0 hover:bg-paper dark:hover:bg-paper-dark transition-colors">
+                              <td className="px-5 py-3 font-semibold text-ink dark:text-ink-dark whitespace-nowrap">
                                 {group.name}
                               </td>
-                              <td className="px-6 py-4">
-                                <div className="flex -space-x-2 overflow-hidden">
+                              <td className="px-5 py-3">
+                                <div className="flex flex-col gap-0.5">
                                   {group.members?.map((m) => (
-                                    <div 
-                                      key={m.id} 
-                                      title={m.name}
-                                      className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-slate-900 text-xs font-bold text-white shadow-sm"
-                                    >
-                                      {m.name.charAt(0).toUpperCase()}
-                                    </div>
+                                    <span key={m.id} className="text-xs text-ink-muted">{m.name}</span>
                                   ))}
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-5 py-3">
                                 <div className="flex flex-col gap-2 items-start">
-                                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusColors[group.submission_status]}`}>
+                                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap ${statusColors[group.submission_status]}`}>
                                     {statusLabels[group.submission_status]}
                                   </span>
                                   {group.submission_link && (
@@ -684,36 +656,30 @@ const AdminDashboard = () => {
                                       href={group.submission_link}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs text-sky-300 hover:text-sky-200 flex items-center gap-1 font-medium bg-sky-500/10 px-2 py-1 rounded-lg border border-sky-500/20 hover:bg-sky-500/20 transition-all"
+                                      className="px-2.5 py-1 rounded bg-ink-muted/10 text-ink dark:text-ink-dark hover:bg-ink-muted/20 transition-colors font-medium flex items-center gap-1 text-xs"
                                     >
-                                      🔗 View Submission
+                                      View Submission
                                     </a>
                                   )}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-indigo-200">
+                              <td className="px-5 py-3 whitespace-nowrap text-ink-muted font-mono text-xs">
                                 {group.confirmed_at ? formatDate(group.confirmed_at) : '—'}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              <td className="px-5 py-3 whitespace-nowrap">
                                 {group.submission_status === 'confirmed' && (
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => handleAccept(selectedAssignmentId, group.id)}
-                                      className="p-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-lg hover:bg-emerald-500/30 transition-all"
-                                      title="Accept"
+                                      className="px-3 py-1.5 border border-rule text-ink dark:text-ink-dark text-xs font-semibold rounded hover:border-accent hover:text-accent transition-all"
                                     >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                      </svg>
+                                      Accept
                                     </button>
                                     <button
                                       onClick={() => handleReject(selectedAssignmentId, group.id)}
-                                      className="p-1.5 bg-red-500/20 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/30 transition-all"
-                                      title="Reject"
+                                      className="px-3 py-1.5 border border-accent-warn/30 text-accent-warn text-xs font-semibold rounded hover:bg-accent-warn/5 transition-all"
                                     >
-                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
+                                      Reject
                                     </button>
                                   </div>
                                 )}

@@ -4,6 +4,19 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-paper text-ink antialiased;
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    font-weight: 500;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #1A1A1A;
+      color: #F8FAFC;
+    }
   }
 }
