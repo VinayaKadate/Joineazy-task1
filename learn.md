@@ -471,3 +471,31 @@ The app now has production-ready Docker orchestration (one-command startup), res
 ### 📝 Next Steps
 - Phase 7: Documentation (README, API reference, ER diagram, architecture).
 
+---
+
+## 📅 Session 8 — 2026-08-25
+
+### Phase 7: Documentation
+
+**Goal:** Provide a comprehensive standalone README.
+
+---
+
+### ✅ Step 1 — README Rewrite
+Completely rewrote `README.md` to include:
+- **Project Overview:** Clear description of features for both Students and Admins.
+- **Architecture Overview:** High-level summary of the decoupled React/Express/Postgres monolith.
+- **Setup Instructions:** Provided both Docker instructions (`docker-compose up --build`) and local dev instructions.
+- **Seed Script Guide:** Explained how to run `npm run seed` and listed all the demo credentials.
+- **ER Diagram:** Embedded the Mermaid ER diagram directly into the README.
+- **API Reference:** Created a structured table outlining all auth, group, assignment, submission, and analytics endpoints with required roles.
+- **Key Design Decisions:** Documented choices like Raw SQL over ORM, JWT auth, and multi-stage Docker builds.
+
+---
+
+### 🎉 Phase 7 Complete!
+The project is fully documented and ready for submission.
+
+### 📝 Next Steps
+- Phase 8: Deployment (Optional, time-permitting)
+- Phase 9: Demo Video & Submission
