@@ -23,7 +23,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/groups', require('./routes/groups'));
 app.use('/assignments', require('./routes/assignments'));
 app.use('/submissions', require('./routes/submissions'));
-// Phase 5: app.use('/analytics', require('./routes/analytics'));
+app.use('/analytics', require('./routes/analytics'));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {

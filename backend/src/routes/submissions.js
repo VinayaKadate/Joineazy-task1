@@ -7,10 +7,7 @@ const submissionsController = require('../controllers/submissions');
 // Require authentication for all routes
 router.use(verifyToken);
 
-// GET /submissions/file/:filename — Serve uploaded files (available to all authenticated users)
-router.get('/file/:filename', submissionsController.getFile);
-
-// All other submission routes require student role
+// All submission routes require student role
 router.use(requireRole('student'));
 
 // GET /submissions/my-assignments — Get assignments for the student's group

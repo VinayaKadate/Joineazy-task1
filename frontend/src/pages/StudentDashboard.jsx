@@ -27,7 +27,7 @@ const StudentDashboard = () => {
   // Two-step confirm modal
   const [confirmModal, setConfirmModal] = useState(null); // { assignment, step: 'step1' | 'final' }
   const [confirming, setConfirming] = useState(false);
-  const [proofFile, setProofFile] = useState(null);
+  const [submissionLink, setSubmissionLink] = useState('');
 
   // Feedback
   const [error, setError] = useState(null);
@@ -157,8 +157,8 @@ const StudentDashboard = () => {
   const executeConfirmation = async () => {
     if (!confirmModal) return;
     
-    if (confirmModal.step === 'step1' && !proofFile) {
-      setError('Please select a file to upload as proof');
+    if (confirmModal.step === 'step1' && (!submissionLink || !submissionLink.trim())) {
+      setError('Please provide a submission link as proof');
       return;
     }
 
@@ -167,16 +167,14 @@ const StudentDashboard = () => {
     setSuccess(null);
     try {
       if (confirmModal.step === 'step1') {
-        const formData = new FormData();
-        formData.append('file', proofFile);
-        await confirmStep1(confirmModal.assignment.id, formData);
+        await confirmStep1(confirmModal.assignment.id, { submission_link: submissionLink });
         setSuccess(`Step 1 confirmed for "${confirmModal.assignment.title}"`);
       } else {
         await confirmFinal(confirmModal.assignment.id);
         setSuccess(`Submission fully confirmed for "${confirmModal.assignment.title}"! 🎉`);
       }
       setConfirmModal(null);
-      setProofFile(null);
+      setSubmissionLink('');
       await fetchAssignments();
     } catch (err) {
       setError(err.response?.data?.error || 'Confirmation failed');
@@ -213,6 +211,10 @@ const StudentDashboard = () => {
 
   const getStatusInfo = (status) => {
     switch (status) {
+      case 'accepted':
+        return { label: 'Accepted ✅', color: 'bg-green-500/20 border-green-500/40 text-green-300', progress: 100 };
+      case 'rejected':
+        return { label: 'Rejected ❌', color: 'bg-red-500/20 border-red-500/40 text-red-300', progress: 0 };
       case 'confirmed':
         return { label: 'Confirmed ✓', color: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300', progress: 100 };
       case 'step1_confirmed':
@@ -224,7 +226,7 @@ const StudentDashboard = () => {
 
   // ── Compute progress stats ────────────────────────────────────────────────
   const totalAssignments = assignments.length;
-  const confirmedCount = assignments.filter(a => a.submission_status === 'confirmed').length;
+  const confirmedCount = assignments.filter(a => a.submission_status === 'accepted').length;
   const progressPercent = totalAssignments > 0 ? Math.round((confirmedCount / totalAssignments) * 100) : 0;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -275,19 +277,21 @@ const StudentDashboard = () => {
               </p>
               <p className="text-indigo-300 text-sm">
                 {confirmModal.step === 'step1'
-                  ? 'Please upload your submission file as proof. This is required for Step 1.'
+                  ? 'Please provide a link to your work (e.g. Google Drive, OneDrive) as proof.'
                   : 'This is the final step. Are you absolutely sure the submission is complete?'
                 }
               </p>
               
               {confirmModal.step === 'step1' && (
                 <div className="mt-4 text-left">
-                  <label className="block text-sm font-semibold text-indigo-100 mb-2">Proof File *</label>
+                  <label className="block text-sm font-semibold text-indigo-100 mb-2">Submission Link *</label>
                   <input
-                    type="file"
+                    type="url"
                     required
-                    onChange={(e) => setProofFile(e.target.files[0])}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/20 file:text-indigo-300 hover:file:bg-indigo-500/30 transition-all cursor-pointer"
+                    value={submissionLink}
+                    onChange={(e) => setSubmissionLink(e.target.value)}
+                    placeholder="https://docs.google.com/..."
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                   {error && <p className="mt-2 text-red-300 text-xs text-center">{error}</p>}
                 </div>
@@ -298,7 +302,7 @@ const StudentDashboard = () => {
               <button
                 onClick={() => {
                   setConfirmModal(null);
-                  setProofFile(null);
+                  setSubmissionLink('');
                   setError(null);
                 }}
                 className="flex-1 py-3 px-4 bg-white/10 border border-white/20 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all duration-300"
@@ -685,21 +689,21 @@ const StudentDashboard = () => {
                             🔗 OneDrive
                           </a>
                         )}
-                        {assignment.file_url && (
+                        {assignment.submission_link && (
                           <a
-                            href={`http://localhost:5000${assignment.file_url}`}
+                            href={assignment.submission_link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1.5 rounded-full font-semibold border bg-purple-500/20 border-purple-500/40 text-purple-300 hover:bg-purple-500/30 transition-all"
                           >
-                            📎 View Proof
+                            🔗 View Submission
                           </a>
                         )}
                         <span className="text-indigo-300/60">by {assignment.creator_name}</span>
                       </div>
 
                       {/* Action Buttons */}
-                      {assignment.submission_status === 'pending' && (
+                      {(assignment.submission_status === 'pending' || assignment.submission_status === 'rejected') && (
                         <button
                           onClick={() => handleConfirmStep1(assignment)}
                           className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold rounded-2xl shadow-lg transform transition-all duration-300 hover:-translate-y-0.5 hover:shadow-amber-500/30 flex items-center justify-center gap-2"
@@ -707,7 +711,7 @@ const StudentDashboard = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          Yes, I Have Submitted
+                          {assignment.submission_status === 'rejected' ? 'Resubmit Link' : 'Yes, I Have Submitted'}
                         </button>
                       )}
 
