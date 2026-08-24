@@ -25,3 +25,5 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         value: https://joineazy-task1-nine.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        value: 359442548382-jl3228fv1hud96pr7r9lbgnptgri86f4.apps.googleusercontent.com
