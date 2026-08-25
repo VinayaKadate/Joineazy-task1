@@ -58,3 +58,5 @@ coverage/
 # Misc
 .cache/
 *.tsbuildinfo
+
+learn.md
