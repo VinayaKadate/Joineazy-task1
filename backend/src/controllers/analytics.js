@@ -65,44 +65,62 @@ exports.getAssignmentStatus = async (req, res, next) => {
     let groupsQuery = '';
     let queryParams = [];
 
-    if (assignment.target === 'all') {
+    if (assignment.submission_type === 'individual') {
       groupsQuery = `
-        SELECT g.id, g.name, 
-          COALESCE(s.status, 'pending') AS submission_status,
-          s.submission_link,
-          s.admin_remarks,
-          s.confirmed_at,
-          (
-            SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
-            FROM group_members gm
-            JOIN users u ON gm.user_id = u.id
-            WHERE gm.group_id = g.id
-          ) AS members
-        FROM groups g
-        LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
-        ORDER BY g.name ASC
+        SELECT u.id AS id, u.id AS group_id, u.name AS name,
+               COALESCE(s.status, 'pending') AS submission_status,
+               s.submission_link,
+               s.admin_remarks,
+               s.confirmed_at,
+               '[]'::json AS members,
+               u.email
+        FROM enrollments e
+        JOIN users u ON e.student_id = u.id
+        LEFT JOIN submissions s ON s.user_id = u.id AND s.assignment_id = $1
+        WHERE e.course_id = $2
+        ORDER BY u.name ASC
       `;
-      queryParams = [id];
+      queryParams = [id, assignment.course_id];
     } else {
-      groupsQuery = `
-        SELECT g.id, g.name, 
-          COALESCE(s.status, 'pending') AS submission_status,
-          s.submission_link,
-          s.admin_remarks,
-          s.confirmed_at,
-          (
-            SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
-            FROM group_members gm
-            JOIN users u ON gm.user_id = u.id
-            WHERE gm.group_id = g.id
-          ) AS members
-        FROM assignment_targets at
-        JOIN groups g ON at.group_id = g.id
-        LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
-        WHERE at.assignment_id = $1
-        ORDER BY g.name ASC
-      `;
-      queryParams = [id];
+      if (assignment.target === 'all') {
+        groupsQuery = `
+          SELECT g.id, g.name, 
+            COALESCE(s.status, 'pending') AS submission_status,
+            s.submission_link,
+            s.admin_remarks,
+            s.confirmed_at,
+            (
+              SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
+              FROM group_members gm
+              JOIN users u ON gm.user_id = u.id
+              WHERE gm.group_id = g.id
+            ) AS members
+          FROM groups g
+          LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
+          ORDER BY g.name ASC
+        `;
+        queryParams = [id];
+      } else {
+        groupsQuery = `
+          SELECT g.id, g.name, 
+            COALESCE(s.status, 'pending') AS submission_status,
+            s.submission_link,
+            s.admin_remarks,
+            s.confirmed_at,
+            (
+              SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
+              FROM group_members gm
+              JOIN users u ON gm.user_id = u.id
+              WHERE gm.group_id = g.id
+            ) AS members
+          FROM assignment_targets at
+          JOIN groups g ON at.group_id = g.id
+          LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
+          WHERE at.assignment_id = $1
+          ORDER BY g.name ASC
+        `;
+        queryParams = [id];
+      }
     }
 
     const groupsRes = await db.query(groupsQuery, queryParams);
@@ -122,12 +140,16 @@ exports.getAssignmentStatus = async (req, res, next) => {
 
 exports.acceptSubmission = async (req, res, next) => {
   try {
-    const { id, groupId } = req.params;
+    const { id, groupId } = req.params; // For individual assignments, this is actually userId
     
+    const assignmentRes = await db.query('SELECT submission_type FROM assignments WHERE id = $1', [id]);
+    if (assignmentRes.rows.length === 0) return res.status(404).json({ error: 'Assignment not found' });
+    const isIndividual = assignmentRes.rows[0].submission_type === 'individual';
+
     const result = await db.query(
       `UPDATE submissions 
        SET status = 'accepted' 
-       WHERE assignment_id = $1 AND group_id = $2 
+       WHERE assignment_id = $1 AND ${isIndividual ? 'user_id' : 'group_id'} = $2 
        RETURNING *`,
       [id, groupId]
     );
@@ -144,12 +166,16 @@ exports.acceptSubmission = async (req, res, next) => {
 
 exports.rejectSubmission = async (req, res, next) => {
   try {
-    const { id, groupId } = req.params;
+    const { id, groupId } = req.params; // For individual assignments, this is actually userId
     
+    const assignmentRes = await db.query('SELECT submission_type FROM assignments WHERE id = $1', [id]);
+    if (assignmentRes.rows.length === 0) return res.status(404).json({ error: 'Assignment not found' });
+    const isIndividual = assignmentRes.rows[0].submission_type === 'individual';
+
     const result = await db.query(
       `UPDATE submissions 
        SET status = 'rejected' 
-       WHERE assignment_id = $1 AND group_id = $2 
+       WHERE assignment_id = $1 AND ${isIndividual ? 'user_id' : 'group_id'} = $2 
        RETURNING *`,
       [id, groupId]
     );

@@ -816,3 +816,75 @@ Student sees enrolled courses as a responsive grid with Fieldnotes styling. Clic
 
 ### 📝 Next Steps
 - Phase 5: UI/UX — Professor Dashboard (Course Management).
+
+---
+
+## 📅 Session 11 — 2026-08-27
+
+### Phase 5: UI/UX — Professor Dashboard (Course Management)
+
+**Goal:** Transform the Admin Dashboard into a course-centric Professor Dashboard.
+
+---
+
+### ✅ Step 1 — Course Grid View
+
+Rewrote `frontend/src/pages/AdminDashboard.jsx`:
+- Similar to the student side, the default landing view is now "My Courses" showing a grid of taught courses.
+- Each course card displays title, description, and the number of enrolled students.
+- Maintained the Fieldnotes theme: ledger layout, muted ink colors, hairline borders.
+
+### ✅ Step 2 — Course Detail & Assignment Analytics
+
+Clicking a course navigates to a detailed view:
+- Displays course description and total enrolled students.
+- Lists all assignments scoped to this course as ledger rows.
+- Each assignment row shows: Title, `submission_type` badge (individual/group), due date, and quick stats (X/Y submitted, Z% completion rate).
+- Clicking an assignment expands an inline table showing detailed analytics:
+  - For group assignments: Shows group names and their members.
+  - Shows submission status, confirmation time, and quick action buttons (Accept/Reject).
+
+### ✅ Step 3 — Preserved Legacy View
+
+Maintained the "Manage Assignments" tab as a separate view where professors can still create, edit, and delete assignments.
+
+---
+
+### 🎉 Phase 5 Complete!
+Professors now have a highly organized, course-centric view of their classes and can drill down into granular assignment analytics seamlessly.
+
+---
+
+## 📅 Session 12 — 2026-08-27
+
+### Phase 5 Update: Bug Fix — Individual Submissions Schema Flaw
+
+**Goal:** Fix a critical backend bug where individual assignments were being grouped under `group_id`, causing one student's submission to erroneously mark all their group members as submitted.
+
+---
+
+### ✅ Step 1 — Database Schema Migration (`005_individual_submissions.sql`)
+
+- Added a `user_id` column to the `submissions` table.
+- Made `group_id` nullable.
+- Dropped the monolithic `UNIQUE (assignment_id, group_id)` constraint.
+- Created two distinct partial unique indexes:
+  1. `UNIQUE (assignment_id, group_id) WHERE group_id IS NOT NULL`
+  2. `UNIQUE (assignment_id, user_id) WHERE user_id IS NOT NULL`
+
+### ✅ Step 2 — Backend Submissions & Analytics Controller Updates
+
+- `submissions.js`: Updated `acknowledge`, `confirmStep1`, and `confirmFinal` to check `assignment.submission_type`. If individual, upserts and updates run against `user_id` instead of `group_id`.
+- `submissions.js`: Updated `getSubmissionStatus` to query `enrollments` for individual assignments, returning each enrolled student as a separate row.
+- `analytics.js`: Updated `getAssignmentStatus` to similarly query `enrollments`, returning each student directly instead of returning groups.
+- `analytics.js`: Updated `acceptSubmission` and `rejectSubmission` to look up the assignment type dynamically and use either `user_id` or `group_id` in their `WHERE` clauses accordingly.
+
+### ✅ Step 3 — Frontend Integration
+
+- Reverted a hacky `flatMap` loop in `AdminDashboard.jsx` that was artificially splitting group responses.
+- The UI now perfectly displays a "Student" column for individual assignments and a "Group" column for group assignments, consuming the corrected backend response seamlessly.
+
+---
+
+### 🎉 Phase 5 Update Complete!
+Individual submissions now accurately track to specific users in the database, allowing members of the same group to submit and be graded independently on individual assignments.

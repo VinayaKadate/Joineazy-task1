@@ -35,14 +35,16 @@ const getMyAssignments = async (req, res) => {
               s.confirmed_at
        FROM assignments a
        JOIN users u ON u.id = a.created_by
-       LEFT JOIN submissions s ON s.assignment_id = a.id AND s.group_id = $1
+       LEFT JOIN submissions s ON s.assignment_id = a.id AND 
+         ( (a.submission_type = 'group' AND s.group_id = $1) OR 
+           (a.submission_type = 'individual' AND s.user_id = $2) )
        WHERE a.target = 'all'
           OR EXISTS (
             SELECT 1 FROM assignment_targets at
             WHERE at.assignment_id = a.id AND at.group_id = $1
           )
        ORDER BY a.due_date ASC`,
-      [groupId]
+      [groupId, userId]
     );
 
     res.json({
@@ -115,7 +117,7 @@ const acknowledge = async (req, res) => {
       const result = await db.query(
         `INSERT INTO submissions (assignment_id, group_id, status, submission_link, confirmed_at)
          VALUES ($1, $2, 'confirmed', $3, NOW())
-         ON CONFLICT (assignment_id, group_id)
+         ON CONFLICT (assignment_id, group_id) WHERE group_id IS NOT NULL AND user_id IS NULL
          DO UPDATE SET status = 'confirmed', submission_link = $3, confirmed_at = NOW()
          WHERE submissions.status IN ('pending', 'step1_confirmed', 'rejected')
          RETURNING id, assignment_id, group_id, status, submission_link, confirmed_at`,
@@ -149,23 +151,20 @@ const acknowledge = async (req, res) => {
 
     } else {
       // ── INDIVIDUAL ASSIGNMENT: each student acknowledges their own ──
-      // For individual assignments, we use the student's group but the acknowledgment is personal.
-      // We still use the submissions table keyed by (assignment_id, group_id) for backward compat,
-      // but the individual student is tracked.
       const result = await db.query(
-        `INSERT INTO submissions (assignment_id, group_id, status, submission_link, confirmed_at)
+        `INSERT INTO submissions (assignment_id, user_id, status, submission_link, confirmed_at)
          VALUES ($1, $2, 'confirmed', $3, NOW())
-         ON CONFLICT (assignment_id, group_id)
+         ON CONFLICT (assignment_id, user_id) WHERE user_id IS NOT NULL
          DO UPDATE SET status = 'confirmed', submission_link = $3, confirmed_at = NOW()
          WHERE submissions.status IN ('pending', 'step1_confirmed', 'rejected')
-         RETURNING id, assignment_id, group_id, status, submission_link, confirmed_at`,
-        [assignmentId, groupId, submission_link.trim()]
+         RETURNING id, assignment_id, user_id, status, submission_link, confirmed_at`,
+        [assignmentId, userId, submission_link.trim()]
       );
 
       if (result.rows.length === 0) {
         const existing = await db.query(
-          'SELECT status FROM submissions WHERE assignment_id = $1 AND group_id = $2',
-          [assignmentId, groupId]
+          'SELECT status FROM submissions WHERE assignment_id = $1 AND user_id = $2',
+          [assignmentId, userId]
         );
         const currentStatus = existing.rows[0]?.status;
         if (currentStatus === 'confirmed' || currentStatus === 'accepted') {
@@ -232,11 +231,35 @@ const confirmStep1 = async (req, res) => {
       return res.status(404).json({ error: 'Assignment not found or not assigned to your group' });
     }
 
+    if (assignmentResult.rows[0].submission_type === 'individual') {
+      const result = await db.query(
+        `INSERT INTO submissions (assignment_id, user_id, status, submission_link)
+         VALUES ($1, $2, 'step1_confirmed', $3)
+         ON CONFLICT (assignment_id, user_id) WHERE user_id IS NOT NULL
+         DO UPDATE SET status = 'step1_confirmed', submission_link = $3
+         WHERE submissions.status IN ('pending', 'rejected')
+         RETURNING id, assignment_id, user_id, status, submission_link, confirmed_at, created_at`,
+        [assignmentId, userId, submission_link.trim()]
+      );
+
+      if (result.rows.length === 0) {
+        const existing = await db.query(
+          'SELECT status FROM submissions WHERE assignment_id = $1 AND user_id = $2',
+          [assignmentId, userId]
+        );
+        const currentStatus = existing.rows[0]?.status;
+        if (currentStatus === 'step1_confirmed' || currentStatus === 'confirmed' || currentStatus === 'accepted') {
+          return res.status(400).json({ error: 'Submission has already been confirmed at this step or beyond' });
+        }
+      }
+      return res.json({ message: 'Step 1 confirmed with submission link — please do final confirmation', submission: result.rows[0] });
+    }
+
     // Upsert the submission record — set to step1_confirmed with link
     const result = await db.query(
       `INSERT INTO submissions (assignment_id, group_id, status, submission_link)
        VALUES ($1, $2, 'step1_confirmed', $3)
-       ON CONFLICT (assignment_id, group_id)
+       ON CONFLICT (assignment_id, group_id) WHERE group_id IS NOT NULL AND user_id IS NULL
        DO UPDATE SET status = 'step1_confirmed', submission_link = $3
        WHERE submissions.status IN ('pending', 'rejected')
        RETURNING id, assignment_id, group_id, status, submission_link, confirmed_at, created_at`,
@@ -289,6 +312,36 @@ const confirmFinal = async (req, res) => {
       return res.status(403).json({
         error: 'Only the group leader can confirm group assignments.',
       });
+    }
+
+    if (assignmentResult.rows[0].submission_type === 'individual') {
+      const result = await db.query(
+        `UPDATE submissions
+         SET status = 'confirmed', confirmed_at = NOW()
+         WHERE assignment_id = $1 AND user_id = $2 AND status = 'step1_confirmed'
+         RETURNING id, assignment_id, user_id, status, confirmed_at, created_at`,
+        [assignmentId, userId]
+      );
+
+      if (result.rows.length === 0) {
+        const existing = await db.query(
+          'SELECT status FROM submissions WHERE assignment_id = $1 AND user_id = $2',
+          [assignmentId, userId]
+        );
+        if (existing.rows.length === 0) {
+          return res.status(400).json({ error: 'You must complete Step 1 first' });
+        }
+        if (existing.rows[0].status === 'confirmed' || existing.rows[0].status === 'accepted') {
+          return res.status(400).json({ error: 'Submission is already fully confirmed' });
+        }
+        if (existing.rows[0].status === 'pending') {
+          return res.status(400).json({ error: 'You must complete Step 1 before final confirmation' });
+        }
+        if (existing.rows[0].status === 'rejected') {
+          return res.status(400).json({ error: 'Submission was rejected. Please re-submit from Step 1 with the correct link.' });
+        }
+      }
+      return res.json({ message: 'Submission fully confirmed!', submission: result.rows[0] });
     }
 
     // Update status from step1_confirmed → confirmed
@@ -354,63 +407,86 @@ const getSubmissionStatus = async (req, res) => {
       : '';
     if (statusFilter) queryParams.push(statusFilter);
 
-    if (assignment.target === 'all') {
+    if (assignment.submission_type === 'individual') {
       groupsQuery = `
-        SELECT g.id AS group_id, g.name AS group_name, g.leader_id,
-               leader_u.name AS leader_name,
+        SELECT u.id AS id, u.id AS group_id, u.name AS group_name,
                COALESCE(s.status, 'pending') AS submission_status,
                s.submission_link,
                s.admin_remarks,
                s.confirmed_at,
-               (
-                 SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
-                 FROM group_members gm
-                 JOIN users u ON gm.user_id = u.id
-                 WHERE gm.group_id = g.id
-               ) AS members
-        FROM groups g
-        LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
-        LEFT JOIN users leader_u ON leader_u.id = g.leader_id
-        WHERE 1=1 ${statusClause}
-        ORDER BY g.name ASC
+               '[]'::json AS members
+        FROM enrollments e
+        JOIN users u ON e.student_id = u.id
+        LEFT JOIN submissions s ON s.user_id = u.id AND s.assignment_id = $1
+        WHERE e.course_id = $2 ${statusClause}
+        ORDER BY u.name ASC
       `;
+      queryParams = [assignmentId, assignment.course_id];
+      if (statusFilter) queryParams.push(statusFilter);
+      // for individual, the statuses list should just be students. We alias u.id as group_id so the rest of the code works.
     } else {
-      groupsQuery = `
-        SELECT g.id AS group_id, g.name AS group_name, g.leader_id,
-               leader_u.name AS leader_name,
-               COALESCE(s.status, 'pending') AS submission_status,
-               s.submission_link,
-               s.admin_remarks,
-               s.confirmed_at,
-               (
-                 SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
-                 FROM group_members gm
-                 JOIN users u ON gm.user_id = u.id
-                 WHERE gm.group_id = g.id
-               ) AS members
-        FROM assignment_targets at
-        JOIN groups g ON at.group_id = g.id
-        LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
-        LEFT JOIN users leader_u ON leader_u.id = g.leader_id
-        WHERE at.assignment_id = $1 ${statusClause}
-        ORDER BY g.name ASC
-      `;
+      if (assignment.target === 'all') {
+        groupsQuery = `
+          SELECT g.id AS group_id, g.name AS group_name, g.leader_id,
+                 leader_u.name AS leader_name,
+                 COALESCE(s.status, 'pending') AS submission_status,
+                 s.submission_link,
+                 s.admin_remarks,
+                 s.confirmed_at,
+                 (
+                   SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
+                   FROM group_members gm
+                   JOIN users u ON gm.user_id = u.id
+                   WHERE gm.group_id = g.id
+                 ) AS members
+          FROM groups g
+          LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
+          LEFT JOIN users leader_u ON leader_u.id = g.leader_id
+          WHERE 1=1 ${statusClause}
+          ORDER BY g.name ASC
+        `;
+      } else {
+        groupsQuery = `
+          SELECT g.id AS group_id, g.name AS group_name, g.leader_id,
+                 leader_u.name AS leader_name,
+                 COALESCE(s.status, 'pending') AS submission_status,
+                 s.submission_link,
+                 s.admin_remarks,
+                 s.confirmed_at,
+                 (
+                   SELECT json_agg(json_build_object('id', u.id, 'name', u.name, 'email', u.email))
+                   FROM group_members gm
+                   JOIN users u ON gm.user_id = u.id
+                   WHERE gm.group_id = g.id
+                 ) AS members
+          FROM assignment_targets at
+          JOIN groups g ON at.group_id = g.id
+          LEFT JOIN submissions s ON s.group_id = g.id AND s.assignment_id = $1
+          LEFT JOIN users leader_u ON leader_u.id = g.leader_id
+          WHERE at.assignment_id = $1 ${statusClause}
+          ORDER BY g.name ASC
+        `;
+      }
     }
 
     const groupsResult = await db.query(groupsQuery, queryParams);
 
-    // For students, only return their own group's status
+    // For students, only return their own status/group
     let statuses = groupsResult.rows;
     if (role === 'student') {
-      const membershipResult = await db.query(
-        'SELECT group_id FROM group_members WHERE user_id = $1',
-        [userId]
-      );
-      if (membershipResult.rows.length > 0) {
-        const myGroupId = membershipResult.rows[0].group_id;
-        statuses = statuses.filter(s => s.group_id === myGroupId);
+      if (assignment.submission_type === 'individual') {
+        statuses = statuses.filter(s => s.id === userId);
       } else {
-        statuses = [];
+        const membershipResult = await db.query(
+          'SELECT group_id FROM group_members WHERE user_id = $1',
+          [userId]
+        );
+        if (membershipResult.rows.length > 0) {
+          const myGroupId = membershipResult.rows[0].group_id;
+          statuses = statuses.filter(s => s.group_id === myGroupId);
+        } else {
+          statuses = [];
+        }
       }
     }
 

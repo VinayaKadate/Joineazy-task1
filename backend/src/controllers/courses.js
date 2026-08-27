@@ -149,14 +149,20 @@ const getCourseAssignments = async (req, res) => {
         // For students, include their group's submission status
         let submission_status = null;
         if (role === 'student') {
-          const subResult = await db.query(
-            `SELECT s.status, s.confirmed_at, s.submission_link
-             FROM submissions s
-             JOIN group_members gm ON gm.group_id = s.group_id
-             WHERE s.assignment_id = $1 AND gm.user_id = $2
-             LIMIT 1`,
-            [assignment.id, userId]
-          );
+          let subQuery = '';
+          if (assignment.submission_type === 'individual') {
+            subQuery = `SELECT s.status, s.confirmed_at, s.submission_link
+                        FROM submissions s
+                        WHERE s.assignment_id = $1 AND s.user_id = $2
+                        LIMIT 1`;
+          } else {
+            subQuery = `SELECT s.status, s.confirmed_at, s.submission_link
+                        FROM submissions s
+                        JOIN group_members gm ON gm.group_id = s.group_id
+                        WHERE s.assignment_id = $1 AND gm.user_id = $2
+                        LIMIT 1`;
+          }
+          const subResult = await db.query(subQuery, [assignment.id, userId]);
           if (subResult.rows.length > 0) {
             submission_status = subResult.rows[0];
           }
