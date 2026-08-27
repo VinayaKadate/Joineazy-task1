@@ -668,3 +668,59 @@ Backend now supports course-based structure. Students can fetch their enrolled c
 
 ### 📝 Next Steps
 - Phase 2: Backend — Group Leader Acknowledgment Logic.
+
+---
+
+### Phase 2: Backend — Group Leader Acknowledgment Logic
+
+**Goal:** Only the group leader can acknowledge group assignments (propagates to all members). Individual assignments are acknowledged by each student independently.
+
+---
+
+### ✅ Step 1 — New Acknowledge Endpoint
+
+Added `POST /submissions/:assignmentId/acknowledge` to `backend/src/controllers/submissions.js`:
+
+| Submission Type | Who Can Acknowledge | What Happens |
+|---|---|---|
+| `group` | Only `leader_id` of the group | Upserts submission as `confirmed` for the entire group. All members' status is updated. |
+| `individual` | The student themselves | Upserts submission as `confirmed` for the student's group entry. |
+
+**Key behavior:**
+- Non-leader group members get a **403** with message: "Only the group leader can acknowledge group assignments."
+- Submission link is required for both types.
+- Upserts handle re-submission after rejection (status `rejected` → `confirmed`).
+
+### ✅ Step 2 — Leader Enforcement on Existing Confirm Endpoints
+
+Updated `confirmStep1` and `confirmFinal`:
+- Both now check `assignment.submission_type` and compare `userId` against `group.leader_id`.
+- Group assignments reject non-leader callers with 403.
+- Individual assignments allow any student to confirm.
+
+### ✅ Step 3 — Submission Status Endpoint
+
+Added `GET /submissions/:assignmentId/status`:
+- Returns per-group status with member lists and leader info.
+- **Filterable** via `?status=pending|confirmed|accepted|rejected`.
+- **Role-aware**: professors see all groups, students see only their own group.
+- Includes a `summary` object with counts per status.
+
+### ✅ Step 4 — Route Refactor
+
+Updated `backend/src/routes/submissions.js`:
+- Removed router-level `requireRole('student')` — status endpoint needs to be accessible to professors.
+- Applied `requireRole('student')` per-route on student-only endpoints.
+- Added `/acknowledge` and `/:assignmentId/status` routes.
+
+### ✅ Step 5 — getMyAssignments Enhanced
+
+Updated `getMyAssignments` to return `is_leader` and `leader_id` so the frontend knows whether to show or hide the acknowledge button.
+
+---
+
+### 🎉 Phase 2 Complete!
+Group leader acknowledgment logic is enforced at the backend level. Only leaders can acknowledge group assignments (propagating to all members), non-leaders get clear error messages, and professors can filter submission status by state.
+
+### 📝 Next Steps
+- Phase 3: UI/UX — Auth Flow Polish.

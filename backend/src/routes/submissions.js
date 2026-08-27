@@ -7,16 +7,19 @@ const submissionsController = require('../controllers/submissions');
 // Require authentication for all routes
 router.use(verifyToken);
 
-// All submission routes require student role
-router.use(requireRole('student'));
+// GET /submissions/my-assignments — Get assignments for the student's group (student only)
+router.get('/my-assignments', requireRole('student'), submissionsController.getMyAssignments);
 
-// GET /submissions/my-assignments — Get assignments for the student's group
-router.get('/my-assignments', submissionsController.getMyAssignments);
+// POST /submissions/:assignmentId/acknowledge — Leader/individual acknowledgment (student only)
+router.post('/:assignmentId/acknowledge', requireRole('student'), submissionsController.acknowledge);
 
-// POST /submissions/:assignmentId/confirm-step1 — First confirmation step
-router.post('/:assignmentId/confirm-step1', submissionsController.confirmStep1);
+// POST /submissions/:assignmentId/confirm-step1 — First confirmation step (student only)
+router.post('/:assignmentId/confirm-step1', requireRole('student'), submissionsController.confirmStep1);
 
-// POST /submissions/:assignmentId/confirm-final — Final confirmation
-router.post('/:assignmentId/confirm-final', submissionsController.confirmFinal);
+// POST /submissions/:assignmentId/confirm-final — Final confirmation (student only)
+router.post('/:assignmentId/confirm-final', requireRole('student'), submissionsController.confirmFinal);
+
+// GET /submissions/:assignmentId/status — Per-group status (both roles, filtered in controller)
+router.get('/:assignmentId/status', submissionsController.getSubmissionStatus);
 
 module.exports = router;
