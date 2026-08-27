@@ -772,3 +772,47 @@ Login and register feel responsive with visible feedback at every state (idle, v
 
 ### 📝 Next Steps
 - Phase 4: UI/UX — Student Dashboard (Course Grid).
+
+---
+
+### Phase 4: UI/UX — Student Dashboard (Course Grid)
+
+**Goal:** Replace flat tab view with a course-centric grid. Students see enrolled courses first, click to drill into assignments.
+
+---
+
+### ✅ Step 1 — Course Grid View
+
+Rewrote `frontend/src/pages/StudentDashboard.jsx`:
+- **Courses tab** is now the default landing view (was "Group" tab before).
+- Responsive grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`.
+- Each card is a `<button>` with:
+  - Mono course code (`Course #N`)
+  - Serif course title (with hover color transition to accent)
+  - Description (2-line clamp)
+  - Bottom meta row: professor name + assignment count (separated by hairline border)
+- Staggered `animate-fade-in` with per-card delay for visual polish.
+
+### ✅ Step 2 — Course Detail (Assignment Drill-down)
+
+Clicking a course card navigates to an inline detail view:
+- Back button (chevron left) + course code + title header.
+- Assignments fetched via `getCourseAssignments(courseId)`.
+- Each assignment card shows: title, submission_type badge (mono), status badge, progress bar, due date, and OneDrive link.
+- **Leader-aware actions**: group assignments show "Only the group leader can acknowledge" for non-leaders, while leaders and individual assignments show the confirm buttons.
+
+### ✅ Step 3 — Group Tab Preserved
+
+Group management (create, add/remove members, leave) remains fully functional under the "My Group" tab. The tab now shows leader status.
+
+### ✅ Step 4 — Layout Widened
+
+Changed `max-w-2xl` to `max-w-4xl` to accommodate the 3-column grid on larger screens.
+
+---
+
+### 🎉 Phase 4 Complete!
+Student sees enrolled courses as a responsive grid with Fieldnotes styling. Clicking a course drills into its assignments with leader-aware submission actions.
+
+### 📝 Next Steps
+- Phase 5: UI/UX — Professor Dashboard (Course Management).
