@@ -4,7 +4,7 @@ const db = require('../models/db');
 const createAssignment = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { title, description, due_date, onedrive_link, target, group_ids } = req.body;
+    const { title, description, due_date, onedrive_link, target, group_ids, course_id, submission_type } = req.body;
 
     if (!title || !title.trim()) {
       return res.status(400).json({ error: 'Title is required' });
@@ -13,7 +13,19 @@ const createAssignment = async (req, res) => {
       return res.status(400).json({ error: 'Due date is required' });
     }
 
+    // Validate course_id if provided
+    if (course_id) {
+      const courseCheck = await db.query('SELECT id, professor_id FROM courses WHERE id = $1', [course_id]);
+      if (courseCheck.rows.length === 0) {
+        return res.status(404).json({ error: 'Course not found' });
+      }
+      if (courseCheck.rows[0].professor_id !== userId) {
+        return res.status(403).json({ error: 'You can only create assignments for your own courses' });
+      }
+    }
+
     const assignmentTarget = target === 'specific' ? 'specific' : 'all';
+    const subType = submission_type === 'individual' ? 'individual' : 'group';
 
     // Validate group_ids if target is specific
     if (assignmentTarget === 'specific') {
@@ -24,10 +36,10 @@ const createAssignment = async (req, res) => {
 
     // Create the assignment
     const result = await db.query(
-      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, title, description, due_date, onedrive_link, created_by, target, created_at`,
-      [title.trim(), description || null, due_date, onedrive_link || null, userId, assignmentTarget]
+      `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target, course_id, submission_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, title, description, due_date, onedrive_link, created_by, target, course_id, submission_type, created_at`,
+      [title.trim(), description || null, due_date, onedrive_link || null, userId, assignmentTarget, course_id || null, subType]
     );
     const assignment = result.rows[0];
 
@@ -68,7 +80,7 @@ const updateAssignment = async (req, res) => {
   try {
     const userId = req.user.id;
     const assignmentId = parseInt(req.params.id);
-    const { title, description, due_date, onedrive_link, target, group_ids } = req.body;
+    const { title, description, due_date, onedrive_link, target, group_ids, course_id, submission_type } = req.body;
 
     // Check ownership
     const existing = await db.query(
@@ -90,18 +102,23 @@ const updateAssignment = async (req, res) => {
       }
     }
 
+    const subType = submission_type === 'individual' ? 'individual' : (submission_type === 'group' ? 'group' : existing.rows[0].submission_type);
+    const updatedCourseId = course_id !== undefined ? (course_id || null) : existing.rows[0].course_id;
+
     // Update the assignment
     const result = await db.query(
       `UPDATE assignments
-       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target = $5
-       WHERE id = $6
-       RETURNING id, title, description, due_date, onedrive_link, created_by, target, created_at`,
+       SET title = $1, description = $2, due_date = $3, onedrive_link = $4, target = $5, course_id = $6, submission_type = $7
+       WHERE id = $8
+       RETURNING id, title, description, due_date, onedrive_link, created_by, target, course_id, submission_type, created_at`,
       [
         title?.trim() || existing.rows[0].title,
         description !== undefined ? description : existing.rows[0].description,
         due_date || existing.rows[0].due_date,
         onedrive_link !== undefined ? onedrive_link : existing.rows[0].onedrive_link,
         assignmentTarget,
+        updatedCourseId,
+        subType,
         assignmentId,
       ]
     );

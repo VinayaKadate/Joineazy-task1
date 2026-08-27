@@ -615,3 +615,56 @@ The database schema now supports: courses, student enrollments, group leaders, c
 
 ### 📝 Next Steps
 - Phase 1: Backend — Courses & Enrollment API endpoints.
+
+---
+
+## 📅 Session 10 — 2026-08-27
+
+### Phase 1: Backend — Courses & Enrollment
+
+**Goal:** API layer for course-based structure. Students fetch enrolled courses, professors fetch taught courses, and assignments are scoped to courses.
+
+---
+
+### ✅ Step 1 — Courses Controller (`backend/src/controllers/courses.js`)
+
+Created five handlers:
+
+| Handler | Endpoint | Purpose |
+|---|---|---|
+| `getMyCourses` | `GET /courses/mine` | Role-aware: students get enrolled courses (with professor name), professors get taught courses (with student/assignment counts) |
+| `getCourse` | `GET /courses/:id` | Single course with professor name and student count. Access-checked per role. |
+| `getCourseAssignments` | `GET /courses/:id/assignments` | Assignments scoped to a course. For students, includes per-assignment submission status. |
+| `createCourse` | `POST /courses` | Professor creates a new course (title, description). |
+| `getCourseStudents` | `GET /courses/:id/students` | Professor-only: lists enrolled students with their group info. |
+
+**Access control:** Every endpoint verifies the user's right to access the course — professors must own the course, students must be enrolled.
+
+### ✅ Step 2 — Courses Routes (`backend/src/routes/courses.js`)
+
+- All routes require `verifyToken` (applied via `router.use`).
+- `POST /courses` and `GET /:id/students` additionally require `requireRole('admin')`.
+- `GET /mine`, `GET /:id`, and `GET /:id/assignments` are open to both roles — access is enforced in the controller.
+- Static route `/mine` placed before `/:id` to avoid parameter conflicts.
+
+Registered in `backend/src/app.js`: `app.use('/courses', require('./routes/courses'))`.
+
+### ✅ Step 3 — Assignment Controller Update
+
+Updated `backend/src/controllers/assignments.js`:
+- `createAssignment` now accepts `course_id` and `submission_type` from the request body.
+- Validates that the course exists and the professor owns it before allowing assignment creation.
+- `updateAssignment` now handles `course_id` and `submission_type` updates.
+- Both INSERT and UPDATE queries return the new fields in their RETURNING clause.
+
+### ✅ Step 4 — Frontend API Helper (`frontend/src/api/courses.js`)
+
+Created `frontend/src/api/courses.js` with functions: `getMyCourses`, `getCourse`, `getCourseAssignments`, `createCourse`, `getCourseStudents`.
+
+---
+
+### 🎉 Phase 1 Complete!
+Backend now supports course-based structure. Students can fetch their enrolled courses and drill into course-specific assignments. Professors can fetch their taught courses, view enrolled students, and create assignments scoped to courses.
+
+### 📝 Next Steps
+- Phase 2: Backend — Group Leader Acknowledgment Logic.

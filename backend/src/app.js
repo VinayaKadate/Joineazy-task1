@@ -23,6 +23,7 @@ app.get('/health', (req, res) => {
 // ── API Routes (added phase by phase) ────────────────────────────────────────
 app.use('/auth', require('./routes/auth'));
 app.use('/groups', require('./routes/groups'));
+app.use('/courses', require('./routes/courses'));
 app.use('/assignments', require('./routes/assignments'));
 app.use('/submissions', require('./routes/submissions'));
 app.use('/analytics', require('./routes/analytics'));
