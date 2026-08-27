@@ -957,3 +957,17 @@ The visual design language for progress tracking is now perfectly synchronized b
 The UI is fully responsive and completely conforms to the project's strict aesthetic guidelines.
 
 ---
+
+### Phase 9 — Documentation
+
+**Goal:** Ensure the `README.md` meets all project documentation requirements.
+
+#### ✅ Step 1 — README Updates
+- Added a new `Screenshots` section with Markdown image placeholders (ready for the user to drag-and-drop actual screenshots).
+- Overhauled the `Key Design & Deployment Decisions` section to explicitly document the "Fieldnotes" aesthetic rules, why we used text-based statuses over colored pills, and why we implemented course-based grouping for assignments.
+- Updated the Mermaid ER diagram to include the new `courses`, `enrollments` tables, and the `user_id` and `submission_type` relationships on assignments/submissions.
+
+### 🎉 Phase 9 Complete!
+The documentation correctly reflects all architectural and UI/UX design choices made throughout the project.
+
+---

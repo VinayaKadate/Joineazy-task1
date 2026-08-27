@@ -93,6 +93,21 @@ erDiagram
         timestamp created_at
     }
 
+    courses {
+        int     id           PK
+        varchar title
+        text    description
+        int     created_by   FK
+        timestamp created_at
+    }
+
+    enrollments {
+        int     id           PK
+        int     course_id    FK
+        int     user_id      FK
+        timestamp joined_at
+    }
+
     groups {
         int     id           PK
         varchar name
@@ -108,13 +123,15 @@ erDiagram
     }
 
     assignments {
-        int     id           PK
+        int     id              PK
+        int     course_id       FK
         varchar title
         text    description
         timestamp due_date
         text    onedrive_link
-        int     created_by   FK
+        int     created_by      FK
         varchar target
+        enum    submission_type
         timestamp created_at
     }
 
@@ -128,20 +145,27 @@ erDiagram
         int     id            PK
         int     assignment_id FK
         int     group_id      FK
+        int     user_id       FK
         enum    status
+        text    submission_link
         timestamp confirmed_at
         timestamp created_at
     }
 
+    users        ||--o{ courses           : "creates (admin)"
+    courses      ||--o{ enrollments       : "has students"
+    users        ||--o{ enrollments       : "enrolls in"
     users        ||--o{ groups            : "creates"
     users        ||--o{ group_members     : "belongs to"
     groups       ||--o{ group_members     : "has"
-    users        ||--o{ assignments       : "creates (admin)"
+    courses      ||--o{ assignments       : "contains"
     assignments  ||--o{ assignment_targets : "targets"
     groups       ||--o{ assignment_targets : "targeted by"
     assignments  ||--o{ submissions       : "has"
-    groups       ||--o{ submissions       : "submits"
+    groups       ||--o{ submissions       : "submits (group)"
+    users        ||--o{ submissions       : "submits (individual)"
 ```
+
 
 ---
 
@@ -192,13 +216,25 @@ All protected routes require a JWT token in the `Authorization` header (`Bearer 
 
 ---
 
+## 📸 Screenshots
+
+*(To be added by user: Drop your screenshots into a `docs/screenshots/` folder)*
+
+- **Login Screen:** `![Login Page](./docs/screenshots/login.png)`
+- **Student Dashboard:** `![Student Dashboard](./docs/screenshots/student_dashboard.png)`
+- **Professor Dashboard:** `![Professor Dashboard](./docs/screenshots/professor_dashboard.png)`
+- **Assignment View:** `![Assignment Detail](./docs/screenshots/assignment_detail.png)`
+
+---
+
 ## ⚖️ Key Design & Deployment Decisions
 
-1. **Raw SQL over ORM:** Used `pg` directly to allow for maximum transparency and control over complex JOINs (especially for analytics and group targeting).
-2. **Stateless JWT Auth:** Chosen over session-based auth to decouple the frontend from the backend, making the API truly RESTful and easier to scale.
-3. **Multi-stage Docker Builds:** The frontend uses a multi-stage Dockerfile that builds the Vite application and serves the static assets using an optimized Nginx server, resulting in a tiny, production-ready image.
-4. **Relational Integrity:** Extensive use of PostgreSQL foreign keys and `ON DELETE CASCADE` constraints ensures orphaned records are never left behind (e.g., deleting a group automatically removes its members and submissions).
-5. **Tailwind CSS Glassmorphism:** Chose a modern, highly responsive design system utilizing backdrop filters and smooth CSS transitions to provide a premium user experience without relying on heavy external UI libraries.
+1. **"Fieldnotes" UI/UX Design System:** The application strictly adheres to a ledger-style "Fieldnotes" aesthetic. This means no heavy shadows, no rounded UI pills, and reliance on hairline borders (`border-rule`) with a structured, data-heavy grid. We chose this because it ensures high information density for academic settings while feeling crisp, professional, and distinct from typical "bubbly" SaaS apps. Monospace fonts are used for IDs/Metadata, and Serifs for headers, giving it an editorial feel.
+2. **Course-Based Grouping:** Assignments are scoped by `course_id`. We introduced an "All Courses" discovery mechanism so students can actively browse and self-enroll in courses created by professors, avoiding the overhead of professors manually adding students.
+3. **Text-Based Status Indicators:** Rather than relying on colored background pills for statuses, we rely on bold, mono-spaced text indicators. This aligns with the Fieldnotes aesthetic, improving accessibility and maintaining a clean, document-like presentation.
+4. **Raw SQL over ORM:** Used `pg` directly to allow for maximum transparency and control over complex JOINs (especially for analytics and group targeting).
+5. **Stateless JWT Auth:** Chosen over session-based auth to decouple the frontend from the backend, making the API truly RESTful and easier to scale.
+6. **Multi-stage Docker Builds:** The frontend uses a multi-stage Dockerfile that builds the Vite application and serves the static assets using an optimized Nginx server, resulting in a tiny, production-ready image.
 
 ---
 

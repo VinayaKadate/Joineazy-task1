@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/VinayaKadate/Joineazy-task1/issues"
   },
-  "homepage": "https://github.com/VinayaKadate/Joineazy-task1#readme"
+  "homepage": "https://github.com/VinayaKadate/Joineazy-task1#readme",
+  "dependencies": {
+    "puppeteer": "^24.43.1"
+  }
 }
