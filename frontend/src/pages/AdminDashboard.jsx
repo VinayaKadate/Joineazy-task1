@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { getMyCourses, getCourseAssignments, getCourseStudents } from '../api/courses';
+import { getMyCourses, getCourseAssignments, getCourseStudents, createCourse } from '../api/courses';
 import { getAllAssignments, createAssignment, updateAssignment, deleteAssignment, getAllGroups } from '../api/assignments';
 import { getAnalyticsSummary, getAssignmentStatus, acceptSubmission, rejectSubmission } from '../api/analytics';
 import ThemeToggle from '../components/ThemeToggle';
@@ -16,6 +16,11 @@ const AdminDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [courseSubmissionStats, setCourseSubmissionStats] = useState({}); // { courseId: { total, confirmed } }
+
+  // ── Create Course state ───────────────────────────────────────────────────
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [courseSubmitting, setCourseSubmitting] = useState(false);
+  const [courseFormData, setCourseFormData] = useState({ title: '', description: '' });
 
   // ── Course detail state ───────────────────────────────────────────────────
   const [courseAssignments, setCourseAssignments] = useState([]);
@@ -38,6 +43,8 @@ const AdminDashboard = () => {
     onedrive_link: '',
     target: 'all',
     group_ids: [],
+    course_id: '',
+    submission_type: 'group',
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -105,6 +112,22 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => { fetchCourses(); }, [fetchCourses]);
+
+  const handleCreateCourse = async (e) => {
+    e.preventDefault();
+    setError(null); setSuccess(null); setCourseSubmitting(true);
+    try {
+      await createCourse(courseFormData);
+      setSuccess('Course created successfully!');
+      setCourseFormData({ title: '', description: '' });
+      setShowCourseForm(false);
+      await fetchCourses();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to create course');
+    } finally {
+      setCourseSubmitting(false);
+    }
+  };
 
   // ── Course drill-in ───────────────────────────────────────────────────────
   const handleSelectCourse = async (course) => {
@@ -211,7 +234,7 @@ const AdminDashboard = () => {
 
   // ── Form Handlers ─────────────────────────────────────────────────────────
   const resetForm = () => {
-    setFormData({ title: '', description: '', due_date: '', onedrive_link: '', target: 'all', group_ids: [] });
+    setFormData({ title: '', description: '', due_date: '', onedrive_link: '', target: 'all', group_ids: [], course_id: '', submission_type: 'group' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -226,6 +249,8 @@ const AdminDashboard = () => {
       onedrive_link: assignment.onedrive_link || '',
       target: assignment.target,
       group_ids: assignment.targeted_groups?.map(g => g.id) || [],
+      course_id: assignment.course_id || '',
+      submission_type: assignment.submission_type || 'group',
     });
     setEditingId(assignment.id);
     setShowForm(true);
@@ -382,7 +407,76 @@ const AdminDashboard = () => {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'courses' && !selectedCourse && (
           <div>
-            {courses.length === 0 ? (
+            <div className="flex justify-end mb-4">
+              {!showCourseForm && (
+                <button
+                  onClick={() => setShowCourseForm(true)}
+                  className="px-5 py-2.5 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90 flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  New Course
+                </button>
+              )}
+            </div>
+
+            {/* Create Course Form */}
+            {showCourseForm && (
+              <div className="mb-8 bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xl font-serif text-ink dark:text-ink-dark">New Course</h3>
+                  <button
+                    onClick={() => { setShowCourseForm(false); setCourseFormData({ title: '', description: '' }); }}
+                    className="p-2 text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <form onSubmit={handleCreateCourse} className="space-y-5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Course Title *</label>
+                    <input
+                      type="text"
+                      required
+                      value={courseFormData.title}
+                      onChange={(e) => setCourseFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark placeholder-ink-faint focus:outline-none focus:border-accent transition-colors"
+                      placeholder="e.g. Intro to Computer Science"
+                      maxLength={150}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Description</label>
+                    <textarea
+                      value={courseFormData.description}
+                      onChange={(e) => setCourseFormData(prev => ({ ...prev, description: e.target.value }))}
+                      className="w-full px-4 py-3 bg-transparent border border-rule dark:border-rule-strong rounded-lg text-ink dark:text-ink-dark placeholder-ink-faint focus:outline-none focus:border-accent transition-colors resize-none"
+                      placeholder="Describe the course..."
+                      rows={3}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={courseSubmitting}
+                    className="w-full py-3 px-6 bg-accent text-paper font-semibold rounded transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                  >
+                    {courseSubmitting ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <span>Create Course</span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {courses.length === 0 && !showCourseForm ? (
               <div className="bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-12 text-center">
                 <h3 className="text-lg font-serif text-ink dark:text-ink-dark mb-1">No Courses Yet</h3>
                 <p className="text-ink-muted text-sm">You haven't created any courses. Use the seed script or create courses to get started.</p>
@@ -775,37 +869,84 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Target Selection */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Assign To</label>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, target: 'all', group_ids: [] }))}
-                        className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
-                          formData.target === 'all'
-                            ? 'bg-accent text-paper border-accent'
-                            : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
-                        }`}
+                  {/* Course Selection + Submission Type row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Course *</label>
+                      <select
+                        required
+                        value={formData.course_id}
+                        onChange={(e) => setFormData(prev => ({ ...prev, course_id: e.target.value }))}
+                        className="w-full px-4 py-3 bg-transparent border-b border-rule dark:border-rule-strong text-ink dark:text-ink-dark focus:outline-none focus:border-accent transition-colors"
                       >
-                        All Groups
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, target: 'specific' }))}
-                        className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
-                          formData.target === 'specific'
-                            ? 'bg-accent text-paper border-accent'
-                            : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
-                        }`}
-                      >
-                        Specific Groups
-                      </button>
+                        <option value="" disabled>Select a course</option>
+                        {courses.map(course => (
+                          <option key={course.id} value={course.id}>{course.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Submission Type</label>
+                      <div className="flex gap-3 pt-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="submission_type"
+                            value="group"
+                            checked={formData.submission_type === 'group'}
+                            onChange={(e) => setFormData(prev => ({ ...prev, submission_type: e.target.value, target: 'all' }))}
+                            className="text-accent focus:ring-accent"
+                          />
+                          <span className="text-sm text-ink dark:text-ink-dark">Group</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="submission_type"
+                            value="individual"
+                            checked={formData.submission_type === 'individual'}
+                            onChange={(e) => setFormData(prev => ({ ...prev, submission_type: e.target.value, target: 'all', group_ids: [] }))}
+                            className="text-accent focus:ring-accent"
+                          />
+                          <span className="text-sm text-ink dark:text-ink-dark">Individual</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Group Picker (when target is specific) */}
-                  {formData.target === 'specific' && (
+                  {/* Target Selection (only for group assignments) */}
+                  {formData.submission_type === 'group' && (
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Assign To</label>
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, target: 'all', group_ids: [] }))}
+                          className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
+                            formData.target === 'all'
+                              ? 'bg-accent text-paper border-accent'
+                              : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
+                          }`}
+                        >
+                          All Groups
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, target: 'specific' }))}
+                          className={`flex-1 py-2.5 px-4 rounded text-sm font-semibold transition-all duration-200 border ${
+                            formData.target === 'specific'
+                              ? 'bg-accent text-paper border-accent'
+                              : 'bg-transparent border-rule text-ink-muted hover:border-ink-muted'
+                          }`}
+                        >
+                          Specific Groups
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Group Picker (when target is specific and group assignment) */}
+                  {formData.submission_type === 'group' && formData.target === 'specific' && (
                     <div className="space-y-3">
                       <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">
                         Select Groups ({formData.group_ids.length} selected)
@@ -901,17 +1042,31 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Meta info row */}
+                      {/* Meta info row */}
                     <div className="flex flex-wrap items-center gap-4 text-xs text-ink-muted">
+                      {/* Course */}
+                      {assignment.course_id && (
+                        <span className="flex items-center gap-1">
+                          <span className="font-semibold text-ink dark:text-ink-dark">
+                            Course: {courses.find(c => c.id === assignment.course_id)?.title || `#${assignment.course_id}`}
+                          </span>
+                        </span>
+                      )}
+
                       {/* Due date */}
                       <span className={`flex items-center ${isOverdue(assignment.due_date) ? 'text-accent-warn font-semibold' : ''}`}>
                         Due {formatDate(assignment.due_date)}
                       </span>
 
+                      {/* Type */}
+                      <span className="font-mono">{assignment.submission_type || 'group'}</span>
+
                       {/* Target */}
-                      <span>
-                        {assignment.target === 'all' ? 'All Groups' : `${assignment.targeted_groups?.length || 0} Group${(assignment.targeted_groups?.length || 0) !== 1 ? 's' : ''}`}
-                      </span>
+                      {assignment.submission_type !== 'individual' && (
+                        <span>
+                          {assignment.target === 'all' ? 'All Groups' : `${assignment.targeted_groups?.length || 0} Group${(assignment.targeted_groups?.length || 0) !== 1 ? 's' : ''}`}
+                        </span>
+                      )}
 
                       {/* OneDrive link */}
                       {assignment.onedrive_link && (

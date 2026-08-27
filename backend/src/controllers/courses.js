@@ -172,37 +172,107 @@ const getCourseAssignments = async (req, res) => {
       })
     );
 
-    res.json({ assignments });
+    // For students, include their group's leader info
+    let leader_info = null;
+    if (role === 'student') {
+      const leaderResult = await db.query(
+        `SELECT g.id AS group_id, g.name AS group_name, g.leader_id, u.name AS leader_name
+         FROM group_members gm
+         JOIN groups g ON g.id = gm.group_id
+         JOIN users u ON u.id = g.leader_id
+         WHERE gm.user_id = $1
+         LIMIT 1`,
+        [userId]
+      );
+      if (leaderResult.rows.length > 0) {
+        leader_info = {
+          ...leaderResult.rows[0],
+          is_leader: leaderResult.rows[0].leader_id === userId,
+        };
+      }
+    }
+
+    res.json({ assignments, leader_info });
   } catch (error) {
     console.error('Get Course Assignments Error:', error);
     res.status(500).json({ error: 'Server error while fetching course assignments' });
   }
 };
 
-// ── POST /courses — Professor creates a new course ───────────────────────────
+// ── POST /courses — Create a new course (Admin/Professor) ──────────────────
 const createCourse = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { title, description } = req.body;
+    const professorId = req.user.id;
 
-    if (!title || !title.trim()) {
+    if (!title) {
       return res.status(400).json({ error: 'Course title is required' });
     }
 
     const result = await db.query(
-      `INSERT INTO courses (title, description, professor_id)
-       VALUES ($1, $2, $3)
-       RETURNING id, title, description, professor_id, created_at`,
-      [title.trim(), description || null, userId]
+      'INSERT INTO courses (title, description, professor_id) VALUES ($1, $2, $3) RETURNING *',
+      [title, description || null, professorId]
     );
 
-    res.status(201).json({
-      message: 'Course created successfully',
-      course: result.rows[0],
-    });
+    res.status(201).json({ course: result.rows[0] });
   } catch (error) {
     console.error('Create Course Error:', error);
     res.status(500).json({ error: 'Server error while creating course' });
+  }
+};
+
+// ── GET /courses — Get all courses (for student enrollment) ──────────────────
+const getAllCourses = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Get all courses with professor name and a flag indicating if the student is enrolled
+    const result = await db.query(
+      `SELECT c.*, 
+              u.name AS professor_name,
+              EXISTS(SELECT 1 FROM enrollments e WHERE e.course_id = c.id AND e.student_id = $1) as is_enrolled
+       FROM courses c
+       JOIN users u ON u.id = c.professor_id
+       ORDER BY c.title ASC`,
+      [userId]
+    );
+
+    res.json({ courses: result.rows });
+  } catch (error) {
+    console.error('Get All Courses Error:', error);
+    res.status(500).json({ error: 'Server error while fetching all courses' });
+  }
+};
+
+// ── POST /courses/:id/enroll — Student enrolls in a course ───────────────────
+const enrollCourse = async (req, res) => {
+  try {
+    const courseId = parseInt(req.params.id);
+    const userId = req.user.id;
+
+    // Verify course exists
+    const courseCheck = await db.query('SELECT id FROM courses WHERE id = $1', [courseId]);
+    if (courseCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Check if already enrolled
+    const enrollCheck = await db.query(
+      'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+      [userId, courseId]
+    );
+    if (enrollCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'Already enrolled in this course' });
+    }
+
+    await db.query(
+      'INSERT INTO enrollments (student_id, course_id) VALUES ($1, $2)',
+      [userId, courseId]
+    );
+
+    res.status(200).json({ message: 'Successfully enrolled in course' });
+  } catch (error) {
+    console.error('Enroll Course Error:', error);
+    res.status(500).json({ error: 'Server error while enrolling in course' });
   }
 };
 
@@ -240,4 +310,12 @@ const getCourseStudents = async (req, res) => {
   }
 };
 
-module.exports = { getMyCourses, getCourse, getCourseAssignments, createCourse, getCourseStudents };
+module.exports = {
+  getMyCourses,
+  getCourse,
+  getCourseAssignments,
+  getCourseStudents,
+  createCourse,
+  getAllCourses,
+  enrollCourse,
+};

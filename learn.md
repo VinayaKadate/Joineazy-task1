@@ -888,3 +888,38 @@ Professors now have a highly organized, course-centric view of their classes and
 
 ### 🎉 Phase 5 Update Complete!
 Individual submissions now accurately track to specific users in the database, allowing members of the same group to submit and be graded independently on individual assignments.
+
+---
+
+### Phase 6 — Frontend: Student Single Assignment Rich UI
+
+**Goal:** Provide a rich, single-assignment drill-down view for students with clear status feedback, animations, and leader-aware group acknowledgments.
+
+#### ✅ Step 1 — Backend Leader Info
+- Updated `getCourseAssignments` to dynamically query and attach `leader_info` (group name, leader name, and `is_leader` flag) if the assignment targets a group, removing the need for a separate frontend fetch.
+
+#### ✅ Step 2 — Refactored StudentDashboard UI
+- Converted the old flat assignment list into a drill-down ledger view matching the "Fieldnotes" theme.
+- The assignment details page now displays descriptions, due dates (with overdue warnings), and status visually.
+- **Leader Enforcement:** If the assignment is a group assignment and the student is *not* the leader, the "Acknowledge" button is hidden. Instead, they see a message: "Waiting on leader: [Leader Name]".
+
+#### ✅ Step 3 — Theming & Animations
+- Implemented CSS keyframes in `tailwind.config.js` (`checkmark`, `pulse-ring`, `draw-check`).
+- Added smooth, performant CSS-only checkmark animations when an assignment is successfully acknowledged or confirmed.
+
+---
+
+### Phase 0 / Phase 1 UI Follow-up: Course & Assignment Management
+
+**Goal:** Ensure the Professor UI fully respects the new backend architecture constraints (Courses, Individual/Group types) and allows end-to-end user workflows.
+
+#### ✅ Bug Fix — Professor Assignment Creation Form
+- **Issue:** The `AdminDashboard` form was still using Round 1 logic where assignments were standalone.
+- **Fix:** Added a Course dropdown and a Submission Type (Group/Individual) toggle. Now assignments correctly attach to courses and enforce the right submission type in the DB.
+
+#### ✅ Feature — Course Creation & Student Enrollment
+- Added a "New Course" form to the `AdminDashboard` so professors can dynamically create courses instead of relying entirely on the seed script.
+- Created `GET /courses` and `POST /courses/:id/enroll` endpoints in the backend.
+- Added an **"All Courses"** tab to the `StudentDashboard`, allowing students to self-enroll in courses created by professors instantly.
+
+---

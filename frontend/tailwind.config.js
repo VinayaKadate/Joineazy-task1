@@ -27,10 +27,26 @@ export default {
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
         },
+        'checkmark': {
+          '0%': { opacity: '0', transform: 'scale(0)' },
+          '50%': { opacity: '1', transform: 'scale(1.2)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        'pulse-ring': {
+          '0%': { transform: 'scale(1)', opacity: '0.6' },
+          '100%': { transform: 'scale(1.5)', opacity: '0' },
+        },
+        'draw-check': {
+          '0%': { 'stroke-dashoffset': '24' },
+          '100%': { 'stroke-dashoffset': '0' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
         'shake': 'shake 0.4s ease-in-out',
+        'checkmark': 'checkmark 0.3s ease-out forwards',
+        'pulse-ring': 'pulse-ring 0.6s ease-out forwards',
+        'draw-check': 'draw-check 0.3s ease-out 0.15s forwards',
       },
     },
   },
