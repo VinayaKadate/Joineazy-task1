@@ -433,7 +433,7 @@ const StudentDashboard = () => {
                   <button
                     key={course.id}
                     onClick={() => { setSelectedCourse(course); fetchCourseAssignments(course.id); }}
-                    className="text-left bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6 hover:border-accent/50 hover:shadow-sm transition-all duration-200 group animate-fade-in"
+                    className="text-left bg-paper-raised dark:bg-paper-dark-raised border border-rule dark:border-rule-strong rounded-xl p-6 hover:border-accent/50 transition-all duration-200 group animate-fade-in"
                     style={{ animationDelay: `${idx * 60}ms`, animationFillMode: 'backwards' }}
                   >
                     {/* Course code — mono */}
@@ -764,7 +764,7 @@ const StudentDashboard = () => {
                   {/* Pending / Rejected — Step 1 button */}
                   {(subType === 'individual' || (subType === 'group' && leaderInfo?.is_leader)) && (status === 'pending' || status === 'rejected') && (
                     <button onClick={() => handleConfirmStep1(assignment)}
-                      className="w-full py-3 px-4 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90 hover:shadow-md">
+                      className="w-full py-3 px-4 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90">
                       {status === 'rejected' ? 'Resubmit Link' : 'Yes, I Have Submitted'}
                     </button>
                   )}
@@ -772,7 +772,7 @@ const StudentDashboard = () => {
                   {/* Step 1 done — Final confirm button */}
                   {(subType === 'individual' || (subType === 'group' && leaderInfo?.is_leader)) && status === 'step1_confirmed' && (
                     <button onClick={() => handleConfirmFinal(assignment)}
-                      className="w-full py-3 px-4 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90 hover:shadow-md">
+                      className="w-full py-3 px-4 bg-accent text-paper font-semibold text-sm rounded transition-all duration-200 hover:opacity-90">
                       Confirm Final Submission
                     </button>
                   )}

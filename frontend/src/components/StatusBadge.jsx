@@ -3,11 +3,11 @@ import React from 'react';
 const StatusBadge = ({ status, showCheckmark = false }) => {
   const getStatusInfo = (status) => {
     switch (status) {
-      case 'accepted': return { label: 'Accepted', color: 'text-accent bg-accent/10' };
-      case 'rejected': return { label: 'Rejected', color: 'text-accent-warn bg-accent-warn/10' };
-      case 'confirmed': return { label: 'Confirmed', color: 'text-accent bg-accent/10' };
-      case 'step1_confirmed': return { label: 'Step 1 Done', color: 'text-ink-muted bg-ink-muted/10' };
-      default: return { label: 'Pending', color: 'text-ink-faint bg-ink-faint/10' };
+      case 'accepted': return { label: 'Accepted', color: 'text-accent' };
+      case 'rejected': return { label: 'Rejected', color: 'text-accent-warn' };
+      case 'confirmed': return { label: 'Confirmed', color: 'text-accent' };
+      case 'step1_confirmed': return { label: 'Step 1 Done', color: 'text-ink-muted' };
+      default: return { label: 'Pending', color: 'text-ink-faint' };
     }
   };
 
