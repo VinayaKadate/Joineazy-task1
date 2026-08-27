@@ -5,6 +5,10 @@
 
 ---
 
+# 🏷️ Round 1
+
+---
+
 ## 📅 Session 1 — 2026-08-23
 
 ### Phase 0: Project Scaffolding & Data Model
@@ -532,3 +536,82 @@ The project now includes Infrastructure as Code (IaC) files. Simply connecting t
 
 ### 📝 Next Steps
 - Phase 9: Demo Video & Submission
+
+---
+
+# 🏷️ Round 2
+
+---
+
+## 📅 Session 9 — 2026-08-27
+
+### Phase 0: Schema Redesign
+
+**Goal:** Extend the database to support courses, enrollments, and group-leader acknowledgment before touching any UI or API.
+
+---
+
+### ✅ Step 1 — New Migration (`004_round2_schema.sql`)
+
+Created `backend/migrations/004_round2_schema.sql` with the following changes:
+
+**New tables:**
+
+| Table | Purpose |
+|---|---|
+| `courses` | Courses taught by professors (id, title, description, professor_id FK→users) |
+| `enrollments` | Many-to-many: students ↔ courses (student_id, course_id, UNIQUE constraint) |
+
+**Extended tables:**
+
+| Table | Change | Purpose |
+|---|---|---|
+| `groups` | Added `leader_id` FK→users | Designates group leader (only they can acknowledge group submissions) |
+| `assignments` | Added `course_id` FK→courses | Scopes assignments to a specific course |
+| `assignments` | Added `submission_type` (individual/group) | Controls whether acknowledgment is per-student or per-group |
+
+**Backfill:** Existing groups get `leader_id = created_by` so all current groups have a leader.
+
+**New indexes:** `idx_enrollments_student`, `idx_enrollments_course`, `idx_assignments_course`, `idx_courses_professor`.
+
+**Key decision:** `course_id` on assignments is nullable — existing Round 1 assignments remain valid with `course_id = NULL`. New assignments created in Round 2 will always have a course_id.
+
+---
+
+### ✅ Step 2 — Seed Script Update
+
+Updated `backend/seed.js` to seed the new schema:
+
+**Courses seeded (3):**
+
+| Course | Professor | Enrolled Students |
+|---|---|---|
+| Database Systems | Prof. Smith | All 6 students |
+| Web Development | Prof. Smith | Alice, Bob, Charlie, Diana |
+| UI/UX Design | Prof. Jones | Eve, Frank |
+
+**Groups updated:** All groups now have `leader_id` set (leader = creator for demo data).
+
+**New assignment:** "SQL Query Exercises" — individual submission type, all groups, under Database Systems course.
+
+**Existing assignments** now scoped to courses (DB Design Report → Database Systems, REST API → Web Development, UI Challenge → UI/UX Design).
+
+---
+
+### ✅ Step 3 — ER Diagram Update
+
+Updated `docs/er_diagram.md`:
+- Added `courses` and `enrollments` entities with all columns.
+- Added `leader_id` FK on `groups` and `course_id` FK on `assignments`.
+- Added `submission_type` field on `assignments`.
+- Updated relationships summary table with new relationships.
+- Updated submission status flow diagram.
+- Added assignment types reference table (group vs. individual acknowledgment rules).
+
+---
+
+### 🎉 Phase 0 Complete!
+The database schema now supports: courses, student enrollments, group leaders, course-scoped assignments, and individual vs. group submission types. All demo data updated accordingly.
+
+### 📝 Next Steps
+- Phase 1: Backend — Courses & Enrollment API endpoints.

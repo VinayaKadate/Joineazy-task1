@@ -33,6 +33,7 @@ async function seed() {
     console.log('🗑️  Clearing existing data…');
     await client.query(`
       TRUNCATE TABLE submissions, assignment_targets, assignments,
+                     enrollments, courses,
                      group_members, groups, users
       RESTART IDENTITY CASCADE;
     `);
@@ -77,21 +78,101 @@ async function seed() {
 
     console.log(`   ✅ ${Object.keys(userIds).length} users created`);
 
-    // ── Insert Groups ──────────────────────────────────────────────────────
+    // ── Insert Courses ─────────────────────────────────────────────────────
+    console.log('📚 Creating courses…');
+
+    const courseDefs = [
+      {
+        title: 'Database Systems',
+        description: 'Relational databases, SQL, normalization, indexing, and query optimization.',
+        professor: 'prof.smith@university.edu',
+      },
+      {
+        title: 'Web Development',
+        description: 'Full-stack web development with React, Node.js, Express, and REST APIs.',
+        professor: 'prof.smith@university.edu',
+      },
+      {
+        title: 'UI/UX Design',
+        description: 'User interface design principles, wireframing, prototyping, and usability testing.',
+        professor: 'prof.jones@university.edu',
+      },
+    ];
+
+    const courseIds = {};
+
+    for (const c of courseDefs) {
+      const res = await client.query(
+        `INSERT INTO courses (title, description, professor_id) VALUES ($1, $2, $3) RETURNING id`,
+        [c.title, c.description, userIds[c.professor]]
+      );
+      courseIds[c.title] = res.rows[0].id;
+    }
+
+    console.log(`   ✅ ${Object.keys(courseIds).length} courses created`);
+
+    // ── Insert Enrollments ─────────────────────────────────────────────────
+    console.log('📋 Enrolling students…');
+
+    const enrollmentDefs = [
+      // All 6 students enrolled in Database Systems
+      { student: 'alice@university.edu',   course: 'Database Systems' },
+      { student: 'bob@university.edu',     course: 'Database Systems' },
+      { student: 'charlie@university.edu', course: 'Database Systems' },
+      { student: 'diana@university.edu',   course: 'Database Systems' },
+      { student: 'eve@university.edu',     course: 'Database Systems' },
+      { student: 'frank@university.edu',   course: 'Database Systems' },
+      // Alpha + Beta students in Web Development
+      { student: 'alice@university.edu',   course: 'Web Development' },
+      { student: 'bob@university.edu',     course: 'Web Development' },
+      { student: 'charlie@university.edu', course: 'Web Development' },
+      { student: 'diana@university.edu',   course: 'Web Development' },
+      // Gamma students in UI/UX Design
+      { student: 'eve@university.edu',     course: 'UI/UX Design' },
+      { student: 'frank@university.edu',   course: 'UI/UX Design' },
+    ];
+
+    let enrollmentCount = 0;
+    for (const e of enrollmentDefs) {
+      await client.query(
+        `INSERT INTO enrollments (student_id, course_id) VALUES ($1, $2)`,
+        [userIds[e.student], courseIds[e.course]]
+      );
+      enrollmentCount++;
+    }
+
+    console.log(`   ✅ ${enrollmentCount} enrollments created`);
+
+    // ── Insert Groups (with leader_id) ─────────────────────────────────────
     console.log('📁 Creating groups…');
 
     const groupDefs = [
-      { name: 'Alpha Squad', creator: 'alice@university.edu',   members: ['alice@university.edu', 'bob@university.edu'] },
-      { name: 'Beta Team',   creator: 'charlie@university.edu', members: ['charlie@university.edu', 'diana@university.edu'] },
-      { name: 'Gamma Force', creator: 'eve@university.edu',     members: ['eve@university.edu', 'frank@university.edu'] },
+      {
+        name: 'Alpha Squad',
+        creator: 'alice@university.edu',
+        leader: 'alice@university.edu',
+        members: ['alice@university.edu', 'bob@university.edu'],
+      },
+      {
+        name: 'Beta Team',
+        creator: 'charlie@university.edu',
+        leader: 'charlie@university.edu',
+        members: ['charlie@university.edu', 'diana@university.edu'],
+      },
+      {
+        name: 'Gamma Force',
+        creator: 'eve@university.edu',
+        leader: 'eve@university.edu',
+        members: ['eve@university.edu', 'frank@university.edu'],
+      },
     ];
 
     const groupIds = {};
 
     for (const g of groupDefs) {
       const res = await client.query(
-        `INSERT INTO groups (name, created_by) VALUES ($1, $2) RETURNING id`,
-        [g.name, userIds[g.creator]]
+        `INSERT INTO groups (name, created_by, leader_id) VALUES ($1, $2, $3) RETURNING id`,
+        [g.name, userIds[g.creator], userIds[g.leader]]
       );
       groupIds[g.name] = res.rows[0].id;
 
@@ -105,7 +186,7 @@ async function seed() {
 
     console.log(`   ✅ ${Object.keys(groupIds).length} groups created`);
 
-    // ── Insert Assignments ─────────────────────────────────────────────────
+    // ── Insert Assignments (course-scoped, with submission_type) ───────────
     console.log('📝 Creating assignments…');
 
     const now = new Date();
@@ -120,6 +201,8 @@ async function seed() {
         onedrive_link: 'https://onedrive.live.com/example-db-report',
         created_by: userIds['prof.smith@university.edu'],
         target: 'all',
+        submission_type: 'group',
+        course: 'Database Systems',
         groups: [],
       },
       {
@@ -129,6 +212,8 @@ async function seed() {
         onedrive_link: 'https://onedrive.live.com/example-api-project',
         created_by: userIds['prof.smith@university.edu'],
         target: 'specific',
+        submission_type: 'group',
+        course: 'Web Development',
         groups: ['Alpha Squad', 'Beta Team'],
       },
       {
@@ -138,7 +223,20 @@ async function seed() {
         onedrive_link: 'https://onedrive.live.com/example-ui-challenge',
         created_by: userIds['prof.jones@university.edu'],
         target: 'specific',
+        submission_type: 'group',
+        course: 'UI/UX Design',
         groups: ['Gamma Force'],
+      },
+      {
+        title: 'SQL Query Exercises',
+        description: 'Complete the 10 SQL query exercises covering JOINs, subqueries, aggregation, and window functions. Submit your .sql file.',
+        due_date: inFuture(5),
+        onedrive_link: 'https://onedrive.live.com/example-sql-exercises',
+        created_by: userIds['prof.smith@university.edu'],
+        target: 'all',
+        submission_type: 'individual',
+        course: 'Database Systems',
+        groups: [],
       },
     ];
 
@@ -146,9 +244,9 @@ async function seed() {
 
     for (const a of assignmentDefs) {
       const res = await client.query(
-        `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [a.title, a.description, a.due_date, a.onedrive_link, a.created_by, a.target]
+        `INSERT INTO assignments (title, description, due_date, onedrive_link, created_by, target, submission_type, course_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+        [a.title, a.description, a.due_date, a.onedrive_link, a.created_by, a.target, a.submission_type, courseIds[a.course]]
       );
       assignmentIds[a.title] = res.rows[0].id;
 
@@ -230,6 +328,11 @@ async function seed() {
     console.log('  Student: diana@university.edu      / password123');
     console.log('  Student: eve@university.edu        / password123');
     console.log('  Student: frank@university.edu      / password123');
+    console.log('────────────────────────────────────────────');
+    console.log('\n📚 Courses:');
+    console.log('  Database Systems  — Prof. Smith (6 students)');
+    console.log('  Web Development   — Prof. Smith (4 students)');
+    console.log('  UI/UX Design      — Prof. Jones (2 students)');
     console.log('────────────────────────────────────────────');
 
   } catch (err) {
