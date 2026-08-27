@@ -724,3 +724,51 @@ Group leader acknowledgment logic is enforced at the backend level. Only leaders
 
 ### 📝 Next Steps
 - Phase 3: UI/UX — Auth Flow Polish.
+
+---
+
+### Phase 3: UI/UX — Auth Flow Polish
+
+**Goal:** Smooth, validated, role-redirecting login/register in the Fieldnotes theme.
+
+---
+
+### ✅ Step 1 — Login Page Inline Validation
+
+Updated `frontend/src/pages/Login.jsx`:
+- **Per-field validation** on blur: email format check, password minimum 6 characters.
+- **Red border + inline error text** below invalid fields (with warning icon).
+- **noValidate** on form — custom validation replaces browser defaults.
+- **Loading text** shows "Signing in…" during API call (not just a spinner).
+- **Shake animation** on server error banner to draw attention.
+- **Fade-in animation** on the form card on page load.
+- Unique IDs on all interactive elements (`login-email`, `login-password`, `login-submit`).
+
+### ✅ Step 2 — Register Page Inline Validation + Password Strength
+
+Updated `frontend/src/pages/Register.jsx`:
+- **Three-field validation** on blur: name (≥2 chars), email (format), password (≥6 chars, letters+numbers).
+- **Password strength indicator**: animated bar + label (Weak/Fair/Strong) based on length, case mix, numbers, and special characters.
+- Same error styling, shake animation, fade-in, and loading text as Login.
+- Unique IDs on all elements (`register-name`, `register-email`, `register-password`, `register-submit`, `role-student`, `role-admin`).
+
+### ✅ Step 3 — Tailwind Animations
+
+Updated `frontend/tailwind.config.js`:
+- Added `fade-in` keyframe: `opacity 0→1` + `translateY 8px→0` over 300ms.
+- Added `shake` keyframe: horizontal oscillation (±4px) over 400ms.
+- Registered as `animate-fade-in` and `animate-shake` utilities.
+
+### ✅ Step 4 — Auth Flow Verification
+
+Already in place from Round 1:
+- JWT-based role redirect works: `admin` → `/admin-dashboard`, `student` → `/student-dashboard`.
+- Fieldnotes styling maintained: serif headings, hairline input borders, paper backgrounds, text-based labels.
+
+---
+
+### 🎉 Phase 3 Complete!
+Login and register feel responsive with visible feedback at every state (idle, validation error, loading, server error, success). Password strength indicator guides users. All styling consistent with Fieldnotes theme.
+
+### 📝 Next Steps
+- Phase 4: UI/UX — Student Dashboard (Course Grid).
