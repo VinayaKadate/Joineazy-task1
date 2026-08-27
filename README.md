@@ -239,5 +239,4 @@ All protected routes require a JWT token in the `Authorization` header (`Bearer 
 ---
 
 ## 📖 Additional Documentation
-- [Build Phases](./docs/phases.md)
-- [Development Journal](./learn.md)
+- [Build Phases](./phases.md)
