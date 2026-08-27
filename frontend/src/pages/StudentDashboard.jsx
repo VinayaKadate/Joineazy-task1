@@ -4,6 +4,8 @@ import { getMyGroup, createGroup, addMember, removeMember, leaveGroup } from '..
 import { getMyAssignments, confirmStep1, confirmFinal } from '../api/submissions';
 import { getMyCourses, getCourseAssignments, getAllCourses, enrollCourse } from '../api/courses';
 import ThemeToggle from '../components/ThemeToggle';
+import ProgressBar from '../components/ProgressBar';
+import StatusBadge from '../components/StatusBadge';
 
 const StudentDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -246,13 +248,13 @@ const StudentDashboard = () => {
   };
   const isOverdue = (dateStr) => dateStr && new Date(dateStr) < new Date();
 
-  const getStatusInfo = (status) => {
+  const getProgress = (status) => {
     switch (status) {
-      case 'accepted': return { label: 'Accepted', color: 'text-accent bg-accent/10', progress: 100 };
-      case 'rejected': return { label: 'Rejected', color: 'text-accent-warn bg-accent-warn/10', progress: 0 };
-      case 'confirmed': return { label: 'Confirmed', color: 'text-accent bg-accent/10', progress: 100 };
-      case 'step1_confirmed': return { label: 'Step 1 Done', color: 'text-ink-muted bg-ink-muted/10', progress: 50 };
-      default: return { label: 'Pending', color: 'text-ink-faint bg-ink-faint/10', progress: 0 };
+      case 'accepted': return 100;
+      case 'rejected': return 0;
+      case 'confirmed': return 100;
+      case 'step1_confirmed': return 50;
+      default: return 0;
     }
   };
 
@@ -564,7 +566,6 @@ const StudentDashboard = () => {
                 {/* Ledger rows */}
                 {courseAssignments.map((assignment, idx) => {
                   const status = assignment.submission_status?.status || assignment.submission_status || 'pending';
-                  const statusInfo = getStatusInfo(status);
                   const subType = assignment.submission_type || 'group';
                   return (
                     <button
@@ -595,9 +596,7 @@ const StudentDashboard = () => {
                       </div>
                       {/* Status */}
                       <div className="col-span-2 flex justify-center">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap ${statusInfo.color}`}>
-                          {statusInfo.label}
-                        </span>
+                        <StatusBadge status={status} />
                       </div>
                     </button>
                   );
@@ -613,7 +612,6 @@ const StudentDashboard = () => {
         {activeTab === 'courses' && selectedCourse && selectedAssignment && (() => {
           const assignment = selectedAssignment;
           const status = assignment.submission_status?.status || assignment.submission_status || 'pending';
-          const statusInfo = getStatusInfo(status);
           const subType = assignment.submission_type || 'group';
           const confirmedAt = assignment.submission_status?.confirmed_at || assignment.confirmed_at;
           const submittedLink = assignment.submission_status?.submission_link || assignment.submission_link;
@@ -647,9 +645,7 @@ const StudentDashboard = () => {
                       <span className="text-xs font-mono text-ink-faint px-2.5 py-1 border border-rule dark:border-rule-strong rounded">
                         {subType}
                       </span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${statusInfo.color}`}>
-                        {statusInfo.label}
-                      </span>
+                      <StatusBadge status={status} showCheckmark={true} />
                     </div>
                     {assignment.onedrive_link && (
                       <a href={assignment.onedrive_link} target="_blank" rel="noopener noreferrer"
@@ -661,11 +657,10 @@ const StudentDashboard = () => {
 
                   {/* Progress bar */}
                   <div className="flex items-center gap-3">
-                    <div className="flex-grow h-1.5 bg-rule dark:bg-rule-strong rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `${statusInfo.progress}%` }}></div>
+                    <div className="flex-grow">
+                      <ProgressBar percentage={getProgress(status)} heightClass="h-1.5" containerClass="mt-0" />
                     </div>
-                    <span className="text-xs font-mono text-ink-faint w-8 text-right">{statusInfo.progress}%</span>
+                    <span className="text-xs font-mono text-ink-faint w-8 text-right">{getProgress(status)}%</span>
                   </div>
                 </div>
 

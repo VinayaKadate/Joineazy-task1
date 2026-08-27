@@ -4,6 +4,8 @@ import { getMyCourses, getCourseAssignments, getCourseStudents, createCourse } f
 import { getAllAssignments, createAssignment, updateAssignment, deleteAssignment, getAllGroups } from '../api/assignments';
 import { getAnalyticsSummary, getAssignmentStatus, acceptSubmission, rejectSubmission } from '../api/analytics';
 import ThemeToggle from '../components/ThemeToggle';
+import ProgressBar from '../components/ProgressBar';
+import StatusBadge from '../components/StatusBadge';
 
 const AdminDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -509,12 +511,7 @@ const AdminDashboard = () => {
                           <p className="text-ink-muted text-sm truncate">{course.description}</p>
                         )}
                         {/* Thin progress bar */}
-                        <div className="w-full max-w-xs h-1 bg-rule dark:bg-rule-strong rounded-full overflow-hidden mt-3">
-                          <div
-                            className="h-full bg-accent rounded-full transition-all duration-700 ease-out"
-                            style={{ width: `${completionPct}%` }}
-                          ></div>
-                        </div>
+                        <ProgressBar percentage={completionPct} heightClass="h-1" containerClass="mt-3 max-w-xs" />
                       </div>
 
                       {/* Right: Stats */}
@@ -659,12 +656,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Thin progress bar */}
-                        <div className="w-full h-1 bg-rule dark:bg-rule-strong rounded-full overflow-hidden mt-3">
-                          <div
-                            className="h-full bg-accent rounded-full transition-all duration-700 ease-out"
-                            style={{ width: `${completionPct}%` }}
-                          ></div>
-                        </div>
+                        <ProgressBar percentage={completionPct} heightClass="h-1" containerClass="mt-3" />
 
                         {/* Status summary text */}
                         <div className="flex gap-4 mt-2 text-xs text-ink-muted">
@@ -729,9 +721,7 @@ const AdminDashboard = () => {
                                         )}
                                         <td className="px-6 py-3">
                                           <div className="flex flex-col gap-2 items-start">
-                                            <span className="text-xs font-mono font-semibold text-ink dark:text-ink-dark uppercase tracking-wide">
-                                              {statusLabels[row.submission_status]}
-                                            </span>
+                                            <StatusBadge status={row.submission_status} showCheckmark={true} />
                                             {row.submission_link && (
                                               <a
                                                 href={row.submission_link}

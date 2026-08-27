@@ -923,3 +923,21 @@ Individual submissions now accurately track to specific users in the database, a
 - Added an **"All Courses"** tab to the `StudentDashboard`, allowing students to self-enroll in courses created by professors instantly.
 
 ---
+
+### Phase 7 — UI/UX: Progress Visualization Pass
+
+**Goal:** Standardize the display of status text and progress bars across the app to adhere strictly to the "Fieldnotes" design pattern.
+
+#### ✅ Step 1 — Extracted `ProgressBar` Component
+- Abstracted inline HTML/Tailwind progress bars from `AdminDashboard` and `StudentDashboard` into a unified `<ProgressBar percentage={value} />` component.
+- Enforced a uniform thin line (`h-1` or `h-1.5`), `bg-rule` backing, and `bg-accent` fill with a `duration-700 ease-out` transition.
+
+#### ✅ Step 2 — Extracted `StatusBadge` Component
+- Centralized the mapping of backend submission statuses (`pending`, `confirmed`, `accepted`, `rejected`, etc.) to specific text labels and Tailwind colors.
+- Abstracted the checkmark micro-animation into this component to ensure it appears consistently whenever a task is marked done.
+- Replaced the inline status-mapping functions (`getStatusInfo` and localized string mappings) in both dashboards with `<StatusBadge status={status} />`.
+
+### 🎉 Phase 7 Complete!
+The visual design language for progress tracking is now perfectly synchronized between the Professor view and Student view.
+
+---
