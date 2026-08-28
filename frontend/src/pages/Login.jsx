@@ -66,7 +66,7 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError(null);
     setIsLoading(true);
-    const result = await loginWithGoogle(credentialResponse.credential);
+    const result = await loginWithGoogle(credentialResponse.credential, null, true);
     if (!result.success) {
       setError(result.error);
     }

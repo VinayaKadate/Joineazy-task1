@@ -56,7 +56,7 @@ const login = async (req, res) => {
 
 const googleLogin = async (req, res) => {
   try {
-    const { credential, role } = req.body;
+    const { credential, role, isLogin } = req.body;
     if (!credential) return res.status(400).json({ error: 'Google credential token is required' });
 
     // Verify the Google ID token
@@ -80,6 +80,9 @@ const googleLogin = async (req, res) => {
         user.auth_provider = 'google';
       }
     } else {
+      if (isLogin) {
+        return res.status(401).json({ error: 'No account found with this email. Please create an account first.' });
+      }
       // New user — create account with Google profile data
       const userRole = role === 'admin' ? 'admin' : 'student';
       const insertResult = await db.query(

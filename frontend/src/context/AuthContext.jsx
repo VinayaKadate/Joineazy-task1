@@ -73,9 +73,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (credential, role) => {
+  const loginWithGoogle = async (credential, role, isLogin = false) => {
     try {
-      const response = await api.post('/auth/google', { credential, role });
+      const response = await api.post('/auth/google', { credential, role, isLogin });
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);

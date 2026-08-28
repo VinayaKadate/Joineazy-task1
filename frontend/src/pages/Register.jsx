@@ -74,7 +74,7 @@ const Register = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     setError(null);
     setIsLoading(true);
-    const result = await loginWithGoogle(credentialResponse.credential, role);
+    const result = await loginWithGoogle(credentialResponse.credential, role, false);
     if (!result.success) {
       setError(result.error);
     }
